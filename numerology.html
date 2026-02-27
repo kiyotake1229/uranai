@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数秘術 - 誕生数占い</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a1a;
+      color: #e0d5f5;
+      font-family: 'Hiragino Kaku Gothic Pro', 'メイリオ', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stars {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a1a 100%);
+    }
+
+    .stars::before {
+      content: '';
+      position: absolute;
+      width: 100%; height: 100%;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 50%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 10%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 80%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 30%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 20% 70%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 40%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 60%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 40% 90%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 15% 45%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 65%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 75% 15%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 75%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 35%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 65% 25%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 5%  85%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 95%  5%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 15%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 45% 55%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 85%, #fff 0%, transparent 100%);
+      opacity: 0.6;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 600px;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 0 30px;
+    }
+
+    header .icon {
+      font-size: 48px;
+      display: block;
+      margin-bottom: 10px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    header h1 {
+      font-size: 26px;
+      font-weight: bold;
+      letter-spacing: 4px;
+      color: #d4b8ff;
+      text-shadow: 0 0 20px rgba(180, 130, 255, 0.5);
+    }
+
+    header p {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #9080b0;
+      letter-spacing: 2px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(180, 130, 255, 0.2);
+      border-radius: 20px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      margin-bottom: 20px;
+    }
+
+    /* フォーム */
+    .form-label {
+      display: block;
+      font-size: 13px;
+      color: #b09ad5;
+      letter-spacing: 2px;
+      margin-bottom: 14px;
+    }
+
+    .date-inputs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 28px;
+      align-items: flex-end;
+    }
+
+    .date-field {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .date-field span {
+      font-size: 11px;
+      color: #7060a0;
+      letter-spacing: 1px;
+    }
+
+    .date-field input {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(180, 130, 255, 0.3);
+      border-radius: 10px;
+      color: #e0d5f5;
+      padding: 12px 10px;
+      font-size: 18px;
+      text-align: center;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+      -moz-appearance: textfield;
+    }
+
+    .date-field input::-webkit-outer-spin-button,
+    .date-field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .date-field input:focus {
+      border-color: #a855f7;
+    }
+
+    .date-sep {
+      font-size: 22px;
+      color: #6040a0;
+      padding-bottom: 12px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 16px;
+      letter-spacing: 3px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* 計算過程 */
+    .calc-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(180, 130, 255, 0.15);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: #9080b0;
+      letter-spacing: 1px;
+      line-height: 1.8;
+    }
+
+    .calc-box span.highlight {
+      color: #d4b8ff;
+      font-weight: bold;
+    }
+
+    /* 結果 */
+    #result { display: none; }
+
+    .result-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .life-number {
+      font-size: 72px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #c084fc, #f0abfc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      display: block;
+      margin-bottom: 4px;
+      filter: drop-shadow(0 0 20px rgba(192, 132, 252, 0.5));
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { filter: drop-shadow(0 0 15px rgba(192,132,252,0.4)); }
+      50% { filter: drop-shadow(0 0 30px rgba(192,132,252,0.8)); }
+    }
+
+    .result-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      border-radius: 30px;
+      padding: 6px 18px;
+      font-size: 13px;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .result-title {
+      font-size: 18px;
+      color: #d4b8ff;
+      letter-spacing: 2px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(180, 130, 255, 0.2);
+      margin: 20px 0;
+    }
+
+    .fortune-section { margin-bottom: 20px; }
+
+    .fortune-section h3 {
+      font-size: 12px;
+      color: #a080d0;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+    }
+
+    .fortune-section p {
+      font-size: 15px;
+      line-height: 1.9;
+      color: #e0d5f5;
+    }
+
+    .stars-row { color: #f5c842; font-size: 16px; letter-spacing: 2px; }
+
+    .lucky-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .lucky-item {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(180,130,255,0.2);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .lucky-item .lucky-label {
+      font-size: 10px;
+      color: #9080b0;
+      letter-spacing: 2px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .lucky-item .lucky-value {
+      font-size: 14px;
+      color: #d4b8ff;
+      font-weight: bold;
+    }
+
+    .advice-box {
+      background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(168,85,247,0.1));
+      border: 1px solid rgba(180,130,255,0.35);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+
+    .advice-box h3 {
+      font-size: 12px;
+      color: #c4a0ff;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+    }
+
+    .advice-box p {
+      font-size: 14px;
+      line-height: 1.9;
+      color: #e8deff;
+    }
+
+    .btn-share {
+      width: 100%;
+      padding: 14px;
+      background: rgba(29,161,242,0.15);
+      border: 1px solid rgba(29,161,242,0.4);
+      border-radius: 14px;
+      color: #7bc8f8;
+      font-size: 14px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 8px;
+    }
+
+    .btn-share:hover { background: rgba(29,161,242,0.25); }
+
+    .btn-back {
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      border: 1px solid rgba(180,130,255,0.3);
+      border-radius: 14px;
+      color: #b09ad5;
+      font-size: 14px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 8px;
+    }
+
+    .btn-back:hover { background: rgba(180,130,255,0.1); }
+
+    .btn-zodiac {
+      width: 100%;
+      padding: 14px;
+      background: rgba(180,130,255,0.08);
+      border: 1px solid rgba(180,130,255,0.25);
+      border-radius: 14px;
+      color: #c4a0ff;
+      font-size: 13px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 8px;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+    }
+
+    .btn-zodiac:hover { background: rgba(180,130,255,0.15); }
+
+    footer {
+      text-align: center;
+      padding: 30px 0;
+      font-size: 11px;
+      color: #50406a;
+      letter-spacing: 1px;
+    }
+
+    .error-msg {
+      color: #f87171;
+      font-size: 12px;
+      margin-top: 8px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  <div class="container">
+    <header>
+      <span class="icon">🔢</span>
+      <h1>数秘術 占い</h1>
+      <p>生年月日が示す、あなたの誕生数</p>
+    </header>
+
+    <!-- 入力フォーム -->
+    <div class="card" id="form-section">
+      <label class="form-label">📅 生年月日を入力してください</label>
+      <div class="date-inputs">
+        <div class="date-field" style="flex:2">
+          <span>年（例：1995）</span>
+          <input type="number" id="inp-year" placeholder="1995" min="1900" max="2025">
+        </div>
+        <div class="date-sep">/</div>
+        <div class="date-field">
+          <span>月</span>
+          <input type="number" id="inp-month" placeholder="5" min="1" max="12">
+        </div>
+        <div class="date-sep">/</div>
+        <div class="date-field">
+          <span>日</span>
+          <input type="number" id="inp-day" placeholder="23" min="1" max="31">
+        </div>
+      </div>
+      <p class="error-msg" id="error-msg">正しい日付を入力してください。</p>
+      <button class="btn-submit" id="submit-btn" disabled>✨ 誕生数を調べる ✨</button>
+    </div>
+
+    <!-- 結果 -->
+    <div class="card" id="result">
+      <div class="result-header">
+        <div class="result-badge" id="result-badge">誕生数</div>
+        <span class="life-number" id="life-number">7</span>
+        <div class="result-title" id="result-keyword">神秘の探求者</div>
+      </div>
+
+      <div class="calc-box" id="calc-steps"></div>
+      <hr class="divider">
+
+      <div class="fortune-section">
+        <h3>🔮 あなたの本質</h3>
+        <p id="result-personality"></p>
+      </div>
+      <hr class="divider">
+
+      <div class="fortune-section">
+        <h3>💕 恋愛運</h3>
+        <p id="result-love"></p>
+      </div>
+      <hr class="divider">
+
+      <div class="fortune-section">
+        <h3>💼 仕事運</h3>
+        <p id="result-work"></p>
+      </div>
+      <hr class="divider">
+
+      <div class="fortune-section">
+        <h3>🌟 総合運</h3>
+        <div><span class="stars-row" id="result-stars"></span></div>
+        <br>
+        <p id="result-overall"></p>
+      </div>
+      <hr class="divider">
+
+      <div class="advice-box">
+        <h3>✉ 星からのメッセージ</h3>
+        <p id="result-advice"></p>
+      </div>
+
+      <div class="lucky-row">
+        <div class="lucky-item">
+          <span class="lucky-label">LUCKY COLOR</span>
+          <span class="lucky-value" id="result-color"></span>
+        </div>
+        <div class="lucky-item">
+          <span class="lucky-label">LUCKY ITEM</span>
+          <span class="lucky-value" id="result-item"></span>
+        </div>
+        <div class="lucky-item">
+          <span class="lucky-label">LUCKY NUMBER</span>
+          <span class="lucky-value" id="result-number"></span>
+        </div>
+      </div>
+
+      <button class="btn-share" id="share-btn">𝕏 結果をシェアする</button>
+      <button class="btn-back" id="back-btn">← もう一度調べる</button>
+      <a class="btn-zodiac" href="index.html">🔮 占いTOPへ戻る</a>
+    </div>
+
+    <footer>© 数秘術占い | 娯楽目的のコンテンツです</footer>
+  </div>
+
+  <script>
+    const numerology = {
+      1: {
+        keyword: "開拓者・リーダー",
+        personality: "誕生数1のあなたは、生まれながらのリーダーです。強い意志と独立心を持ち、自ら道を切り拓く力があります。困難な状況でも前向きに立ち向かい、周囲に勇気を与える存在です。負けず嫌いで向上心が高く、一度決めたことは最後までやり遂げる粘り強さがあります。独創性が高く、人が行かない道を進むことに喜びを感じます。",
+        love: "恋愛でも積極的にリードします。好きになったら迷わず行動するタイプで、情熱的な愛情を注ぎます。ただし自分のペースを大切にしすぎると、相手が窮屈に感じることも。相手の意見をしっかり聞くことで、より深い絆が生まれます。",
+        work: "独立心が強く、自分の裁量で動ける環境で最大限に力を発揮します。起業家、リーダー、クリエイターとして活躍できます。人に指示されるより自分で動く方が向いており、キャリアを重ねるほど本来の力が開花します。",
+        weeklyPairs: [
+          { overall: "今週はリーダーシップを発揮するチャンスが訪れます。率先して行動することで、大きな流れを作り出せます。自信を持って一歩踏み出しましょう。", advice: "「今週一つ、誰もやっていないことに挑戦する」ことをしてみてください。あなたの独創性が最大の武器です。", stars: 5, color: "スカーレット", item: "コンパス", number: "1" },
+          { overall: "新しいスタートを切るのに絶好の週です。これまで迷っていたことに、今週決断を下してみましょう。", advice: "「今週一つ、自分の意見を堂々と発信する」ことをしてみてください。あなたの言葉には人を動かす力があります。", stars: 4, color: "ゴールド", item: "万年筆", number: "9" },
+          { overall: "独立心とエネルギーが最高潮の週です。周囲の意見を参考にしながら、最終的には自分の直感を信じて動きましょう。", advice: "「一人でできることとチームでやることを整理する」ことをしてみてください。力の使い方を明確にすると結果が変わります。", stars: 4, color: "ファイアレッド", item: "手帳", number: "3" },
+        ]
+      },
+      2: {
+        keyword: "調和・協調者",
+        personality: "誕生数2のあなたは、生まれながらの調停者です。相手の気持ちに敏感で、場の空気を読む力に長けています。対立を避け、みんなが笑顔でいられる環境を自然と作り出せます。細やかな気配りと優しさで周囲に愛され、縁の下の力持ちとして組織や人間関係を支えます。感受性が豊かで、美しいものや音楽に深く感動できる繊細な心も持っています。",
+        love: "恋愛では相手をとことん思いやるタイプです。相手の喜びが自分の喜びになるほど深い愛情を持っています。ただ自分を後回しにしすぎる面があるので、自分の気持ちもしっかり伝える練習をしましょう。二人でいると自然と安心できる、穏やかな愛の形を育みます。",
+        work: "チームワークを活かせる仕事で真価を発揮します。カウンセラー、調整役、秘書、教育職など「人を支える」仕事が天職です。縁の下から組織全体を支える力があり、あなたがいるだけでチームの雰囲気が良くなります。",
+        weeklyPairs: [
+          { overall: "人間関係が豊かに深まる週です。あなたの優しさと気配りが、誰かの大きな支えになります。小さな親切を積み重ねていきましょう。", advice: "「今週一人、困っていそうな人にそっと声をかけてみる」ことをしてください。その一言が相手の人生を変えるかもしれません。", stars: 4, color: "ラベンダー", item: "アロマキャンドル", number: "2" },
+          { overall: "対話と協力から素晴らしいものが生まれる週です。一人で抱え込まず、誰かと力を合わせることで道が開けます。", advice: "「今週一つ、誰かのために時間を使う」ことをしてみてください。奉仕の心が運を引き寄せます。", stars: 5, color: "ローズクォーツ", item: "花束", number: "6" },
+          { overall: "静かに内側を充実させる週です。感受性が高まっているので、美しいものや音楽に触れる時間を大切にしましょう。", advice: "「自分の気持ちを正直に一つ伝える」ことを今週してみてください。伝えることで心が軽くなります。", stars: 3, color: "パールホワイト", item: "日記帳", number: "4" },
+        ]
+      },
+      3: {
+        keyword: "表現者・クリエイター",
+        personality: "誕生数3のあなたは、豊かな表現力と創造性を持つアーティストです。言葉、アート、音楽など様々な形で自分を表現する才能があります。明るくユーモアに富み、いるだけで場を盛り上げる天性の社交性も持っています。好奇心が旺盛で多くのことに興味を持ち、その幅広い視野がクリエイティブな発想の源になっています。人を笑顔にすることが得意で、エンターテイナーとしての才能も光ります。",
+        love: "恋愛では楽しさと刺激を大切にします。一緒にいると笑顔が絶えない、そんな明るい恋愛が理想です。表現力豊かで相手への愛情を言葉やプレゼントでしっかり伝えられます。飽きっぽい面もあるので、常に新鮮さを保つ工夫が長続きの秘訣です。",
+        work: "創造性を活かせる仕事で輝きます。デザイナー、作家、俳優、教師、マーケターなど表現や伝達に関わる職種が天職です。アイデアを形にするスピードが速く、チームに新しい風を吹き込む存在として重宝されます。",
+        weeklyPairs: [
+          { overall: "創造力が爆発する特別な週です。頭に浮かんだアイデアを形にする絶好のタイミングです。表現することを恐れずに進みましょう。", advice: "「今週一つ、作品を作って誰かに見せる」ことをしてみてください。あなたの表現が誰かの心を動かします。", stars: 5, color: "コーラルオレンジ", item: "スケッチブック", number: "3" },
+          { overall: "言葉の力が際立つ週です。あなたが発する言葉が人の心に深く届きます。発信することを積極的に楽しみましょう。", advice: "「今週一つ、SNSや会話で自分の思いを表現してみる」ことをしてください。言葉が縁をつなぎます。", stars: 4, color: "サンシャインイエロー", item: "カラーペン", number: "7" },
+          { overall: "ユーモアと笑顔が運気を上げる週です。あなたの明るさが周囲を元気にし、良い縁を引き寄せます。", advice: "「今週誰かを笑わせることを意識してみる」ことをしてください。笑いはあなたの最高の才能です。", stars: 4, color: "ライムグリーン", item: "カメラ", number: "5" },
+        ]
+      },
+      4: {
+        keyword: "建設者・実直家",
+        personality: "誕生数4のあなたは、誠実さと粘り強さで着実に成果を積み上げる実力者です。コツコツと努力することを厭わず、一度決めた目標に向かってブレずに進み続ける強さがあります。几帳面で責任感が強く、周囲からの信頼が厚いのが特徴です。基盤を作ることが得意で、物事を長期的な視点で捉えられます。地道な作業の中にも美しさを見出し、質へのこだわりは人一倍です。",
+        love: "恋愛では誠実さと安定感が魅力です。短期的な感情より、長く深い関係を大切にします。言葉より行動で愛情を示すタイプで、日々の小さな積み重ねが愛の証です。少し不器用に見えることもありますが、その誠実さが相手の深い信頼を勝ち取ります。",
+        work: "コツコツ型の努力家で、専門性を極める仕事に向いています。建築、エンジニア、会計、管理職など基盤を作る仕事で実力を発揮します。長期プロジェクトを最後まで丁寧にやり遂げる力があり、組織の中で欠かせない存在になれます。",
+        weeklyPairs: [
+          { overall: "地道な努力が報われる週です。これまで積み上げてきたものが、今週ようやく周囲に認められる場面がありそうです。", advice: "「今週一つ、基礎から丁寧に取り組む」ことを意識してみてください。焦らず着実に進むことが最大の近道です。", stars: 4, color: "アースブラウン", item: "手帳", number: "4" },
+          { overall: "安定と充実が両立する素晴らしい週です。計画通りに物事が進み、達成感を味わえる場面が訪れます。", advice: "「今週の進捗を振り返り、次の一手を決める」ことをしてみてください。整理することで新たな道が見えてきます。", stars: 5, color: "オリーブグリーン", item: "設計図", number: "8" },
+          { overall: "信頼が積み重なっていく週です。あなたの誠実な行動が周囲の心を動かし、大切な縁が深まります。", advice: "「今週一人、長く付き合っている人に改めて感謝を伝える」ことをしてください。関係の土台が一層強固になります。", stars: 3, color: "ダークネイビー", item: "良質なボールペン", number: "2" },
+        ]
+      },
+      5: {
+        keyword: "自由人・冒険者",
+        personality: "誕生数5のあなたは、自由と変化を愛する冒険者です。好奇心が旺盛で新しいことへの適応力が高く、どんな環境でも自分らしさを発揮できます。多才で柔軟性があり、様々な分野に興味を持つことで豊かな人間性を育んでいます。自由な発想と行動力が持ち味で、周囲に刺激と活力を与える存在です。変化を恐れず、むしろ変化の中に喜びを見出す強さを持っています。",
+        love: "恋愛には刺激と自由を求めます。毎回新しい発見がある関係、一緒にいて飽きない相手との恋が長続きします。束縛を嫌うため、お互いの自由を尊重できるパートナーシップが理想です。情熱的に恋に落ちますが、マンネリを感じると気持ちが冷めやすい面も。常に新鮮さを意識しましょう。",
+        work: "変化の多い環境、旅行、メディア、フリーランス、営業など自由度の高い仕事で才能が開花します。一つのことに縛られず、多岐にわたる経験を積むことでオールラウンドな実力者になれます。ルーティンより挑戦を選ぶことで、キャリアが大きく広がります。",
+        weeklyPairs: [
+          { overall: "新しい出会いと変化に満ちた週です。いつもとは違う行動をとることで、思わぬ幸運が舞い込んできます。", advice: "「今週一つ、行ったことのない場所や試したことのないことに挑戦する」ことをしてください。変化があなたを成長させます。", stars: 5, color: "サンセットオレンジ", item: "バックパック", number: "5" },
+          { overall: "自由な発想が最大の武器になる週です。常識にとらわれない視点で動いてみましょう。", advice: "「今週一つ、直感で気になったことをすぐ調べてみる」ことをしてください。好奇心があなたの運を引き寄せます。", stars: 4, color: "ターコイズ", item: "世界地図", number: "7" },
+          { overall: "人との縁が広がりやすい週です。フットワーク軽く動くことで、面白い出会いが待っています。", advice: "「今週、普段話さないタイプの人と会話してみる」ことをしてください。違う価値観が新しい扉を開きます。", stars: 4, color: "ブライトイエロー", item: "旅行グッズ", number: "3" },
+        ]
+      },
+      6: {
+        keyword: "愛情家・奉仕者",
+        personality: "誕生数6のあなたは、深い愛情と責任感を持つ奉仕の心の持ち主です。家族や大切な人のために尽くすことに生きがいを感じ、周囲の人を温かく包み込む包容力があります。美的センスが高く、調和のとれた環境を自然と作り出せます。正義感が強く、困っている人を放っておけない優しさも持っています。誰かの役に立てる喜びが、あなたの最大のモチベーションです。",
+        love: "恋愛では深く献身的に愛します。相手のことを家族のように大切にし、安心感と温かさを提供できます。少し尽くしすぎてしまう面があるので、自分自身も大切にすることを忘れずに。一度愛した人への思いは長く深く続き、長期的な関係を築く才能があります。",
+        work: "医療、教育、保育、福祉、カウンセリングなど「人を助ける」仕事で使命感を持って働けます。美的センスを活かしたインテリアデザインやブライダル業界でも輝けます。チームのまとめ役として慕われ、職場の雰囲気を温かくする存在です。",
+        weeklyPairs: [
+          { overall: "愛情と感謝が循環する温かい週です。誰かへの思いやりが、巡り巡って自分に返ってきます。", advice: "「今週一人、大切な人に「ありがとう」を伝える」ことをしてください。言葉にすることで絆が一層深まります。", stars: 5, color: "ローズピンク", item: "花束", number: "6" },
+          { overall: "美しいものから運気が上がる週です。好きな空間づくりや料理など、美に関わることに時間を使いましょう。", advice: "「今週一つ、身の回りを美しく整える」ことをしてみてください。環境が整うと心も運気も上向きます。", stars: 4, color: "ソフトピーチ", item: "アロマディフューザー", number: "2" },
+          { overall: "誰かのために動くことで自分も輝く週です。奉仕の心があなたの魅力を最大限に引き出します。", advice: "「今週一つ、誰かのために手間をかけてあげる」ことをしてみてください。その優しさが必ず報われます。", stars: 4, color: "ラベンダー", item: "手作りのもの", number: "9" },
+        ]
+      },
+      7: {
+        keyword: "神秘の探求者",
+        personality: "誕生数7のあなたは、深い知性と神秘的な魅力を持つ探求者です。物事の表面ではなく本質を見抜こうとする洞察力があり、哲学や精神世界、科学など深い分野への興味が尽きません。独自の世界観を持ち、一人で深く考える時間が必要です。少人数の深い関係を好み、大勢の浅い付き合いより魂レベルで通じ合える友人を大切にします。直感が鋭く、第六感とも呼べる特別な感覚を持っています。",
+        love: "恋愛では精神的なつながりを何より大切にします。外見より内面の深さに惹かれ、じっくりと相手を理解してから心を開きます。一度信頼した相手には深く長い愛情を注ぎます。孤独な時間も必要なため、相手にもある程度の自立を求めます。神秘的な雰囲気が相手を惹きつける大きな魅力です。",
+        work: "研究、哲学、宗教、心理学、占い、科学など深く掘り下げる分野で本領を発揮します。分析力と洞察力が武器で、誰も気づかなかった真実を発見できます。一人で集中できる環境が向いており、専門性を極めるほど評価が高まります。",
+        weeklyPairs: [
+          { overall: "直感と洞察力が研ぎ澄まされる週です。長く考えてきた問いへの答えが、ふとした瞬間に降りてくるかもしれません。", advice: "「今週一つ、深く気になっているテーマを徹底的に調べてみる」ことをしてみてください。知識が扉を開きます。", stars: 5, color: "ミッドナイトブルー", item: "哲学書", number: "7" },
+          { overall: "一人の静かな時間が運気を高める週です。騒がしい場所より、静寂の中で重要な気づきが生まれます。", advice: "「今週一度、デジタルを切って一人で静かに過ごす時間を作る」ことをしてください。内側の声が聞こえてきます。", stars: 4, color: "ディープパープル", item: "クリスタル", number: "11" },
+          { overall: "神秘的な縁が動く週です。偶然の出会いや出来事に、大切なメッセージが隠されているかもしれません。", advice: "「今週、直感で気になった本や映画に触れてみる」ことをしてください。そこに求めていた答えがあります。", stars: 4, color: "インディゴ", item: "タロットカード", number: "3" },
+        ]
+      },
+      8: {
+        keyword: "力・成功者",
+        personality: "誕生数8のあなたは、強い意志と実行力で大きな成功を掴む力を持っています。野心家でありながら現実的で、夢を具体的な計画に落とし込んで着実に実現できます。リーダーシップがあり、大きなプロジェクトを統率する力があります。物事を大局で捉える視野の広さと、細部まで目配りできる緻密さを兼ね備えています。困難に直面しても諦めない精神力の強さが、最終的な成功を引き寄せます。",
+        love: "恋愛では頼りがいのある存在として信頼されます。強さの裏に深い愛情を秘めており、大切な人を守ることに全力を注ぎます。仕事への情熱が強いため、パートナーには理解とサポートを求めます。少し不器用でも誠実さと実力で相手の心を掴みます。共に目標を持てる相手との関係が最も輝きます。",
+        work: "経営者、実業家、投資家、プロデューサーなど大きな成果を追い求める仕事で才能が開花します。組織を動かす力があり、長期的なビジョンを持って行動できます。物質的な豊かさを追い求めながら、同時に精神的な充実も大切にすることで真の成功者になれます。",
+        weeklyPairs: [
+          { overall: "成功へのエネルギーが最高潮の週です。大きな目標に向けて、果敢に行動しましょう。今週の決断が将来を大きく変えます。", advice: "「今週一つ、ずっと後回しにしていた重要な決断を下す」ことをしてみてください。決断力があなたの最大の武器です。", stars: 5, color: "ロイヤルゴールド", item: "高品質な時計", number: "8" },
+          { overall: "実力が周囲に認められる週です。自信を持って自分のビジョンを語りましょう。あなたの言葉には人を動かす力があります。", advice: "「今週一つ、自分の実績を整理して次の目標を設定する」ことをしてみてください。明確な目標が力を倍にします。", stars: 4, color: "ディープネイビー", item: "革のアイテム", number: "4" },
+          { overall: "努力が実を結ぶ兆しがある週です。コツコツ積み上げてきたものが、大きな形になって現れ始めます。", advice: "「今週一人、ビジョンを共有できる仲間に話しかけてみる」ことをしてください。仲間が夢を現実に近づけます。", stars: 5, color: "アンバーゴールド", item: "トロフィー", number: "1" },
+        ]
+      },
+      9: {
+        keyword: "完成・博愛主義者",
+        personality: "誕生数9のあなたは、深い慈愛と高い精神性を持つ完成者です。人類への愛と社会への貢献を使命として感じており、見返りを求めず誰かのために尽くせる純粋な心を持っています。幅広い視野と豊かな経験から深い知恵が生まれ、多くの人の心に寄り添えます。芸術や哲学への造詣も深く、精神的な豊かさを誰よりも大切にします。すべてを包み込むような温かいオーラが、自然と人を引き寄せます。",
+        love: "恋愛では無条件の愛情を注ぐことができます。相手の全てを受け入れ、深く寄り添う愛し方をします。自己犠牲になりすぎる面があるので、自分の幸せも大切にする意識が必要です。魂レベルで繋がれる深い関係を求めており、表面的な恋愛より本物の絆を大切にします。",
+        work: "社会貢献、教育、医療、福祉、芸術、宗教など人や社会のために働く仕事で使命感を燃やせます。コンサルタントやコーチとしても豊かな経験と知恵を活かせます。お金や名声より「誰かの役に立つこと」が最大のモチベーションになります。",
+        weeklyPairs: [
+          { overall: "慈愛と感謝が循環する週です。誰かへの奉仕が、形を変えて大きな幸運となって返ってきます。", advice: "「今週一つ、見返りを求めずに誰かのために動く」ことをしてみてください。その純粋な行動が運命を動かします。", stars: 5, color: "バイオレット", item: "お守り", number: "9" },
+          { overall: "精神的な深みが増す週です。物質より内側の豊かさに目を向けることで、本当に大切なものが見えてきます。", advice: "「今週一度、自分の人生の目的について静かに考える時間を作る」ことをしてください。答えは内側にあります。", stars: 4, color: "ディープインディゴ", item: "瞑想グッズ", number: "3" },
+          { overall: "広い人脈と深い縁が動く週です。あなたの温かいオーラが素敵な出会いを引き寄せます。", advice: "「今週一人、久しぶりの友人に連絡してみる」ことをしてください。再会が新しいステージへの扉を開きます。", stars: 4, color: "ゴールデンバイオレット", item: "芸術作品", number: "6" },
+        ]
+      },
+      11: {
+        keyword: "マスターナンバー・霊感の使者",
+        personality: "誕生数11はマスターナンバーと呼ばれる特別な数字です。あなたは強い直感と霊的な感受性を持ち、常人には見えない物事の本質を感じ取ることができます。理想主義者でインスピレーションを周囲に与える使命を持っています。感受性が非常に高く、他者の感情や場のエネルギーを敏感に受け取ります。内側に大きな力を秘めており、その力を正しく使うことで多くの人に希望と光を与えられます。",
+        love: "恋愛では精神的・霊的なつながりを最も大切にします。表面的な相性より魂レベルでの共鳴を求めます。相手の感情を深く感じ取れるため、言葉にならない気持ちまで理解できる稀有な存在です。感受性の高さゆえに傷つきやすい面もありますが、それだけ深く愛せます。",
+        work: "ヒーラー、カウンセラー、芸術家、霊能者、精神科医など人の心の深いところに関わる仕事で使命を感じます。インスピレーションを形にするクリエイティブな仕事でも輝けます。理想が高いため、自分の使命に合った仕事を選ぶことが幸福の鍵です。",
+        weeklyPairs: [
+          { overall: "直感と霊感が鋭く冴える特別な週です。夢や予感、ふとした閃きを大切にしてください。宇宙からのメッセージが届いているかもしれません。", advice: "「今週感じたインスピレーションを全て書き留める」ことをしてください。その中に未来の答えが隠れています。", stars: 5, color: "コズミックパープル", item: "クリスタル", number: "11" },
+          { overall: "精神性が高まる週です。瞑想や自然の中での時間が、あなたの内側のエネルギーを浄化してくれます。", advice: "「今週一度、静かな場所で自分の内なる声に耳を傾ける」時間を作ってください。答えは常にあなたの中にあります。", stars: 4, color: "ミッドナイトブルー", item: "天然石", number: "7" },
+          { overall: "使命感が高まる週です。あなたの存在が誰かの光になれる場面が訪れます。自分の感性と直感を信じて動きましょう。", advice: "「今週一人、あなたの直感で「助けが必要」と感じた人に声をかける」ことをしてください。その一歩が奇跡を起こします。", stars: 5, color: "シルバーバイオレット", item: "タロットカード", number: "2" },
+        ]
+      },
+      22: {
+        keyword: "マスターナンバー・大建設家",
+        personality: "誕生数22はマスターナンバーの中でも最も実現力の高い「大建設家」です。大きなビジョンを持ちながら、それを現実に落とし込む驚異的な実行力があります。理想と現実のバランスをとりながら、多くの人の生活を変えるような大きなものを作り上げる使命を持っています。リーダーシップと緻密さを兼ね備え、不可能を可能にする力があります。この数字を持つ人は、歴史に残るような偉大な仕事をする可能性を秘めています。",
+        love: "恋愛では大きな愛情と責任感を持って深く向き合います。相手の成長を全力でサポートし、共に大きな夢を追える関係が理想です。仕事や使命への情熱が強いため、理解あるパートナーが必要です。一度愛した相手には誠実で揺るぎない深い愛情を長く注ぎ続けます。",
+        work: "建築家、実業家、政治家、社会起業家など大きなものを作り上げる仕事で本領を発揮します。組織を率いてビジョンを実現する力があり、社会に大きなインパクトを与えられます。長期的な目標と短期的な計画を両立させる稀有な才能があります。",
+        weeklyPairs: [
+          { overall: "大きな計画が動き出す週です。長期的なビジョンに向けた重要な一手を打つのに最高のタイミングです。", advice: "「今週一つ、大きな目標を具体的な計画に落とし込む」ことをしてみてください。計画が夢を現実に変えます。", stars: 5, color: "プラチナゴールド", item: "設計図", number: "22" },
+          { overall: "実行力と決断力が最大化する週です。あなたのビジョンを信じて、大胆に動いてみましょう。", advice: "「今週一つ、誰かを巻き込んで大きなプロジェクトを始める」ことをしてください。仲間が力を何倍にも増やします。", stars: 5, color: "ロイヤルネイビー", item: "高品質な時計", number: "4" },
+          { overall: "使命を感じる週です。あなたが作るものが多くの人の生活を豊かにする可能性があります。迷いを捨てて前進しましょう。", advice: "「今週一つ、社会に貢献できることを一つ形にしてみる」ことをしてください。小さな一歩が歴史を変えます。", stars: 4, color: "ガンメタルシルバー", item: "万年筆", number: "8" },
+        ]
+      },
+      33: {
+        keyword: "マスターナンバー・奉仕の達人",
+        personality: "誕生数33は最高のマスターナンバーで「奉仕の達人」と呼ばれます。無条件の愛と深い慈悲の心で全ての人に光を与える使命を持っています。深い共感力と癒しの力があり、そばにいるだけで周囲の人を癒し、励ます力があります。高い理想と深い愛情を持ち、社会全体の幸福のために生きることに喜びを感じます。その大きな愛と奉仕の精神は、多くの人の人生に希望の光を灯します。",
+        love: "恋愛では無限の愛情と慈愛を注ぎます。相手の痛みや喜びを自分のことのように感じ、深く寄り添えます。自己犠牲になりすぎる傾向があるので、自分自身を愛することも忘れずに。魂の深いところで繋がれる、精神的なつながりを最も大切にします。",
+        work: "ヒーラー、教師、宗教家、芸術家、ソーシャルワーカーなど人類への奉仕に関わる仕事で使命を輝かせます。その慈愛と癒しの力で、多くの人の人生に良い変化をもたらせます。お金や名声ではなく「人の役に立つこと」が最高の報酬になります。",
+        weeklyPairs: [
+          { overall: "最高の慈愛エネルギーが溢れる週です。あなたの愛の力が誰かの人生を大きく変えられる瞬間が訪れます。", advice: "「今週一つ、見返りを全く求めずに誰かのために動く」ことをしてみてください。その純粋な愛が宇宙を動かします。", stars: 5, color: "ゴールデンホワイト", item: "クリスタル", number: "33" },
+          { overall: "精神的な覚醒が起きる特別な週です。深い洞察と愛の力で、今まで見えなかったものが見えてきます。", advice: "「今週一度、自分への愛と感謝の気持ちを持つ時間を作る」ことをしてください。自分を愛することが他者への愛の源です。", stars: 5, color: "ラベンダーホワイト", item: "瞑想グッズ", number: "6" },
+          { overall: "使命の扉が開く週です。あなたの存在そのものが光です。自信を持って愛を与え続けてください。", advice: "「今週一人、深く悩んでいる人の話をとことん聞いてあげる」ことをしてください。あなたの存在が最高の癒しになります。", stars: 5, color: "コズミックゴールド", item: "祈りのアイテム", number: "9" },
+        ]
+      }
+    };
+
+    // 計算ロジック
+    function calcLifeNumber(year, month, day) {
+      const digits = (String(year) + String(month).padStart(2,'0') + String(day).padStart(2,'0')).split('').map(Number);
+      const steps = [];
+      let sum = digits.reduce((a, b) => a + b, 0);
+      steps.push({ digits, sum });
+
+      while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+        const ds = String(sum).split('').map(Number);
+        sum = ds.reduce((a, b) => a + b, 0);
+        steps.push({ digits: ds, sum });
+      }
+      return { number: sum, steps };
+    }
+
+    function buildCalcHTML(year, month, day, steps) {
+      const dateStr = `${year}/${String(month).padStart(2,'0')}/${String(day).padStart(2,'0')}`;
+      let html = `<div style="margin-bottom:6px;color:#b09ad5;">計算過程</div>`;
+      html += `${dateStr.replace(/\//g,' + ')} = <span class="highlight">${steps[0].sum}</span>`;
+      for (let i = 1; i < steps.length; i++) {
+        html += `&nbsp;&nbsp;→&nbsp;&nbsp;${steps[i].digits.join(' + ')} = <span class="highlight">${steps[i].sum}</span>`;
+      }
+      if (steps[steps.length-1].sum === 11 || steps[steps.length-1].sum === 22 || steps[steps.length-1].sum === 33) {
+        html += `&nbsp; <span class="highlight">✨ マスターナンバー</span>`;
+      }
+      return html;
+    }
+
+    // 入力バリデーション
+    const yearEl  = document.getElementById('inp-year');
+    const monthEl = document.getElementById('inp-month');
+    const dayEl   = document.getElementById('inp-day');
+    const submitEl = document.getElementById('submit-btn');
+    const errorEl  = document.getElementById('error-msg');
+
+    function validate() {
+      const y = parseInt(yearEl.value);
+      const m = parseInt(monthEl.value);
+      const d = parseInt(dayEl.value);
+      if (!yearEl.value || !monthEl.value || !dayEl.value) { submitEl.disabled = true; return; }
+      const date = new Date(y, m-1, d);
+      const valid = date.getFullYear()===y && date.getMonth()===m-1 && date.getDate()===d && y>=1900 && y<=2025;
+      submitEl.disabled = !valid;
+      errorEl.style.display = valid ? 'none' : 'block';
+    }
+
+    [yearEl, monthEl, dayEl].forEach(el => el.addEventListener('input', validate));
+
+    // 占う
+    document.getElementById('submit-btn').addEventListener('click', () => {
+      const y = parseInt(yearEl.value);
+      const m = parseInt(monthEl.value);
+      const d = parseInt(dayEl.value);
+      const { number, steps } = calcLifeNumber(y, m, d);
+      const data = numerology[number];
+      if (!data) return;
+
+      const pair = data.weeklyPairs[Math.floor(Math.random() * data.weeklyPairs.length)];
+
+      document.getElementById('result-badge').textContent = `誕生数 ${number}`;
+      document.getElementById('life-number').textContent = number;
+      document.getElementById('result-keyword').textContent = data.keyword;
+      document.getElementById('calc-steps').innerHTML = buildCalcHTML(y, m, d, steps);
+      document.getElementById('result-personality').textContent = data.personality;
+      document.getElementById('result-love').textContent = data.love;
+      document.getElementById('result-work').textContent = data.work;
+      document.getElementById('result-overall').textContent = pair.overall;
+      document.getElementById('result-advice').textContent = pair.advice;
+      document.getElementById('result-stars').textContent = '★'.repeat(pair.stars) + '☆'.repeat(5 - pair.stars);
+      document.getElementById('result-color').textContent = pair.color;
+      document.getElementById('result-item').textContent = pair.item;
+      document.getElementById('result-number').textContent = pair.number;
+
+      document.getElementById('form-section').style.display = 'none';
+      document.getElementById('result').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('form-section').style.display = 'block';
+    });
+
+    document.getElementById('share-btn').addEventListener('click', () => {
+      const num = document.getElementById('life-number').textContent;
+      const kw  = document.getElementById('result-keyword').textContent;
+      const color = document.getElementById('result-color').textContent;
+      const text = `【数秘術占い】\n私の誕生数は「${num}」\n${kw}\n\nラッキーカラー：${color}\n\n#数秘術 #誕生数占い`;
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+    });
+  </script>
+</body>
+</html>

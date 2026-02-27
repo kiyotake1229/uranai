@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔮 占いの館</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      background: #0a0a1a;
+      color: #e9d5ff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(88, 28, 135, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(109, 40, 217, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(67, 20, 100, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .star {
+      position: absolute;
+      background: #e9d5ff;
+      border-radius: 50%;
+      animation: twinkle var(--dur) ease-in-out infinite alternate;
+    }
+    @keyframes twinkle {
+      from { opacity: var(--min); transform: scale(1); }
+      to   { opacity: var(--max); transform: scale(1.4); }
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+      position: relative;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 72px;
+    }
+
+    .hero-icon {
+      font-size: 64px;
+      display: block;
+      margin-bottom: 20px;
+      animation: float 4s ease-in-out infinite;
+      filter: drop-shadow(0 0 24px rgba(192, 132, 252, 0.6));
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      background: linear-gradient(135deg, #f0abfc 0%, #c084fc 40%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }
+
+    .hero-subtitle {
+      font-size: 1rem;
+      color: #a78bfa;
+      letter-spacing: 0.1em;
+      opacity: 0.85;
+    }
+
+    .hero-divider {
+      width: 120px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #7c3aed, transparent);
+      margin: 28px auto 0;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 28px;
+    }
+
+    .card {
+      position: relative;
+      background: linear-gradient(135deg, rgba(45, 27, 105, 0.6) 0%, rgba(15, 10, 40, 0.8) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 20px;
+      padding: 40px 32px 52px;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      overflow: hidden;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(192, 132, 252, 0.06) 0%, transparent 60%);
+      border-radius: 20px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(192, 132, 252, 0.6);
+      box-shadow: 0 16px 48px rgba(109, 40, 217, 0.3), 0 0 0 1px rgba(192, 132, 252, 0.15);
+    }
+    .card:hover::before { opacity: 1; }
+
+    .card-icon {
+      font-size: 48px;
+      display: block;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 12px rgba(192, 132, 252, 0.5));
+      transition: filter 0.3s ease;
+    }
+    .card:hover .card-icon {
+      filter: drop-shadow(0 0 20px rgba(192, 132, 252, 0.8));
+    }
+
+    .card-tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      color: #a78bfa;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 20px;
+      padding: 3px 12px;
+      margin-bottom: 14px;
+    }
+
+    .card h2 {
+      font-size: 1.4rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: #f3e8ff;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .card p {
+      font-size: 0.88rem;
+      color: #c4b5fd;
+      line-height: 1.85;
+      opacity: 0.85;
+    }
+
+    .card-arrow {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(109, 40, 217, 0.2));
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c084fc;
+      font-size: 1rem;
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+    .card:hover .card-arrow {
+      transform: translateX(4px);
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(109, 40, 217, 0.4));
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 72px;
+      color: #6d28d9;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stars" id="stars"></div>
+
+  <div class="container">
+    <div class="hero">
+      <span class="hero-icon">🔮</span>
+      <h1>占いの館</h1>
+      <p class="hero-subtitle">宇宙の導きで、あなたの運命を紐解く</p>
+      <div class="hero-divider"></div>
+    </div>
+
+    <div class="cards">
+
+      <a class="card" href="seiza.html">
+        <span class="card-icon">🌙</span>
+        <span class="card-tag">ZODIAC × BLOOD TYPE</span>
+        <h2>星座 × 血液型占い</h2>
+        <p>12星座と4血液型の組み合わせで、あなたの本質・恋愛運・仕事運・今週の運勢を鑑定します。</p>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a class="card" href="numerology.html">
+        <span class="card-icon">✨</span>
+        <span class="card-tag">NUMEROLOGY</span>
+        <h2>数秘術占い</h2>
+        <p>生年月日から導き出す「運命数」で、あなたの本質的な使命と今週の流れを読み解きます。</p>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a class="card" href="tarot.html">
+        <span class="card-icon">🃏</span>
+        <span class="card-tag">TAROT</span>
+        <h2>タロット占い</h2>
+        <p>大アルカナ22枚のカードが今のあなたに必要なメッセージを伝えます。1枚引き・3枚引きから選べます。</p>
+        <div class="card-arrow">→</div>
+      </a>
+
+    </div>
+
+    <footer>© 占いの館 | 娯楽目的のコンテンツです</footer>
+  </div>
+
+  <script>
+    const starsEl = document.getElementById('stars');
+    for (let i = 0; i < 80; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 2 + 0.5;
+      s.style.cssText = `
+        width: ${size}px;
+        height: ${size}px;
+        top: ${Math.random() * 100}%;
+        left: ${Math.random() * 100}%;
+        --dur: ${2 + Math.random() * 4}s;
+        --min: ${0.1 + Math.random() * 0.3};
+        --max: ${0.5 + Math.random() * 0.5};
+        animation-delay: ${Math.random() * 4}s;
+      `;
+      starsEl.appendChild(s);
+    }
+  </script>
+</body>
+</html>

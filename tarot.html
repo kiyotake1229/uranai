@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🃏 タロット占い | 占いの館</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      background: #0a0a1a;
+      color: #e9d5ff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(88, 28, 135, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(109, 40, 217, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(67, 20, 100, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .star {
+      position: absolute;
+      background: #e9d5ff;
+      border-radius: 50%;
+      animation: twinkle var(--dur) ease-in-out infinite alternate;
+    }
+    @keyframes twinkle {
+      from { opacity: var(--min); }
+      to   { opacity: var(--max); }
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 52px 20px 80px;
+      position: relative;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    header h1 {
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      background: linear-gradient(135deg, #f0abfc, #c084fc, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+    header p {
+      color: #a78bfa;
+      font-size: 0.92rem;
+      letter-spacing: 0.08em;
+      opacity: 0.85;
+    }
+
+    /* 質問入力 */
+    .question-section {
+      background: linear-gradient(135deg, rgba(45,27,105,0.5), rgba(15,10,40,0.7));
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    .question-label {
+      font-size: 0.85rem;
+      color: #a78bfa;
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+    }
+    .question-input {
+      width: 100%;
+      background: rgba(15,10,40,0.6);
+      border: 1px solid rgba(139,92,246,0.35);
+      border-radius: 10px;
+      color: #e9d5ff;
+      font-family: inherit;
+      font-size: 1rem;
+      padding: 12px 16px;
+      outline: none;
+      transition: border-color 0.3s;
+      text-align: center;
+    }
+    .question-input::placeholder { color: #6d28d9; opacity: 0.7; }
+    .question-input:focus { border-color: rgba(192,132,252,0.6); }
+
+    /* スプレッド選択 */
+    .spread-options {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .spread-btn {
+      background: rgba(45,27,105,0.4);
+      border: 1px solid rgba(139,92,246,0.35);
+      border-radius: 24px;
+      color: #c4b5fd;
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 8px 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .spread-btn:hover, .spread-btn.active {
+      background: rgba(109,40,217,0.4);
+      border-color: rgba(192,132,252,0.6);
+      color: #f0abfc;
+    }
+
+    /* 占うボタン */
+    .btn-divine {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      margin: 28px auto 0;
+      padding: 16px;
+      background: linear-gradient(135deg, #7c3aed, #5b21b6);
+      border: none;
+      border-radius: 50px;
+      color: #f3e8ff;
+      font-family: inherit;
+      font-size: 1.05rem;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(109,40,217,0.4);
+    }
+    .btn-divine:hover {
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      box-shadow: 0 6px 28px rgba(139,92,246,0.5);
+      transform: translateY(-2px);
+    }
+
+    /* カードデッキ演出 */
+    .deck-area {
+      text-align: center;
+      padding: 48px 0;
+      display: none;
+    }
+    .deck-area.show { display: block; }
+    .deck-card {
+      display: inline-block;
+      width: 80px;
+      height: 130px;
+      background: linear-gradient(135deg, #2d1b69, #1a0a3e);
+      border: 2px solid rgba(139,92,246,0.5);
+      border-radius: 10px;
+      margin: 0 6px;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      animation: dealIn 0.5s ease forwards;
+      animation-delay: var(--delay);
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    @keyframes dealIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .deck-card::after {
+      content: '🔮';
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      opacity: 0.6;
+    }
+    .deck-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 32px rgba(139,92,246,0.4);
+    }
+    .deck-hint {
+      margin-top: 20px;
+      color: #a78bfa;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      opacity: 0.8;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    /* 結果 */
+    #result { display: none; }
+    #result.show { display: block; }
+
+    .result-question {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #a78bfa;
+      letter-spacing: 0.06em;
+      margin-bottom: 32px;
+      opacity: 0.85;
+    }
+    .result-question span {
+      color: #c084fc;
+      font-size: 1rem;
+    }
+
+    .spread-label {
+      text-align: center;
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      color: #7c3aed;
+      margin-bottom: 24px;
+    }
+
+    /* カード表示 */
+    .cards-row {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .card-result {
+      flex: 1;
+      min-width: 180px;
+      max-width: 220px;
+      background: linear-gradient(160deg, rgba(45,27,105,0.55), rgba(15,10,40,0.8));
+      border: 1px solid rgba(139,92,246,0.35);
+      border-radius: 16px;
+      overflow: hidden;
+      animation: fadeUp 0.6s ease forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card-result:nth-child(1) { animation-delay: 0.1s; }
+    .card-result:nth-child(2) { animation-delay: 0.3s; }
+    .card-result:nth-child(3) { animation-delay: 0.5s; }
+
+    .card-position {
+      background: rgba(109,40,217,0.25);
+      border-bottom: 1px solid rgba(139,92,246,0.25);
+      text-align: center;
+      padding: 8px;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      color: #a78bfa;
+    }
+
+    .card-face {
+      padding: 24px 16px 20px;
+      text-align: center;
+    }
+
+    .card-symbol {
+      font-size: 44px;
+      display: block;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 0 10px rgba(192,132,252,0.4));
+    }
+
+    .card-number {
+      font-size: 0.72rem;
+      color: #7c3aed;
+      letter-spacing: 0.12em;
+      margin-bottom: 4px;
+    }
+
+    .card-name {
+      font-size: 1.05rem;
+      color: #f3e8ff;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .card-orientation {
+      font-size: 0.72rem;
+      padding: 2px 10px;
+      border-radius: 12px;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+    .upright   { background: rgba(139,92,246,0.2); color: #c084fc; border: 1px solid rgba(139,92,246,0.35); }
+    .reversed  { background: rgba(220,38,38,0.12); color: #f87171; border: 1px solid rgba(220,38,38,0.25); }
+
+    .card-meaning {
+      font-size: 0.83rem;
+      color: #c4b5fd;
+      line-height: 1.8;
+      text-align: left;
+      opacity: 0.9;
+    }
+
+    /* 総合メッセージ */
+    .overall-message {
+      background: linear-gradient(135deg, rgba(45,27,105,0.5), rgba(15,10,40,0.7));
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 16px;
+      padding: 28px 24px;
+      margin-bottom: 32px;
+      animation: fadeUp 0.6s 0.7s ease forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .overall-title {
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      color: #a78bfa;
+      margin-bottom: 14px;
+    }
+    .overall-text {
+      font-size: 0.95rem;
+      color: #e9d5ff;
+      line-height: 1.9;
+    }
+
+    .btn-share {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto 14px;
+      padding: 14px;
+      background: #1a1a2e;
+      border: 1px solid rgba(139,92,246,0.4);
+      border-radius: 50px;
+      color: #c4b5fd;
+      font-family: inherit;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-share:hover { background: rgba(45,27,105,0.5); border-color: rgba(192,132,252,0.5); }
+
+    .btn-retry {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto 24px;
+      padding: 14px;
+      background: linear-gradient(135deg, #7c3aed, #5b21b6);
+      border: none;
+      border-radius: 50px;
+      color: #f3e8ff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-retry:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      color: #7c3aed;
+      font-size: 0.85rem;
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      margin-bottom: 0;
+    }
+    .back-link:hover { opacity: 1; }
+
+    footer {
+      text-align: center;
+      margin-top: 56px;
+      color: #6d28d9;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stars" id="stars"></div>
+
+  <div class="container">
+    <header>
+      <h1>🃏 タロット占い</h1>
+      <p>カードが映し出す、あなたへのメッセージ</p>
+    </header>
+
+    <!-- 入力フォーム -->
+    <div id="form-section">
+      <div class="question-section">
+        <p class="question-label">＊ 心の中で問いかけてください ＊</p>
+        <input class="question-input" id="question" type="text" placeholder="例）恋愛、仕事、これからの方向性…">
+
+        <div class="spread-options">
+          <button class="spread-btn active" data-spread="3">3枚引き（過去・現在・未来）</button>
+          <button class="spread-btn" data-spread="1">1枚引き（今日のカード）</button>
+        </div>
+      </div>
+
+      <button class="btn-divine" id="divine-btn">🔮 カードを引く</button>
+    </div>
+
+    <!-- デッキ演出 -->
+    <div class="deck-area" id="deck-area">
+      <div id="deck-cards"></div>
+      <p class="deck-hint">カードに触れてください…</p>
+    </div>
+
+    <!-- 結果 -->
+    <div id="result">
+      <p class="result-question" id="result-question"></p>
+      <p class="spread-label" id="spread-label"></p>
+      <div class="cards-row" id="cards-row"></div>
+      <div class="overall-message">
+        <p class="overall-title">✦ 総合メッセージ ✦</p>
+        <p class="overall-text" id="overall-text"></p>
+      </div>
+      <button class="btn-share" id="share-btn">𝕏 結果をシェアする</button>
+      <button class="btn-retry" id="retry-btn">← もう一度引く</button>
+      <a class="back-link" href="index.html">🔮 占いTOPへ戻る</a>
+    </div>
+
+    <footer>© タロット占い | 娯楽目的のコンテンツです</footer>
+  </div>
+
+  <script>
+  // =====================================================
+  // 大アルカナ 22枚
+  // 小アルカナを追加する場合はこの配列に追記するだけ
+  // =====================================================
+  const tarotCards = [
+    {
+      number: "0", name: "愚者", symbol: "🌟",
+      upright:  { keyword: "新しい出発・自由・可能性", meaning: "新たな旅の始まりを告げるカード。恐れずに一歩を踏み出すことで、予想外の素晴らしい展開が待っています。直感を信じ、心のままに動く時です。" },
+      reversed: { keyword: "無謀・現実逃避・無計画", meaning: "衝動的な行動には注意が必要です。今は立ち止まり、計画を見直す時かもしれません。地に足をつけて現実と向き合いましょう。" }
+    },
+    {
+      number: "I", name: "魔術師", symbol: "✨",
+      upright:  { keyword: "意志・技術・創造力", meaning: "あなたには夢を現実にする力が備わっています。必要なものはすべて手の中にある。集中して行動に移せば、望む結果を引き寄せられます。" },
+      reversed: { keyword: "欺き・意志の弱さ・未熟", meaning: "力を持ちながら使いこなせていない状態です。自己欺瞞に気をつけて。本当にやりたいことと向き合い、誠実に取り組みましょう。" }
+    },
+    {
+      number: "II", name: "女教皇", symbol: "🌙",
+      upright:  { keyword: "直感・神秘・内なる知恵", meaning: "表面に見えていないものを感じ取る力が高まっています。今は行動より内省の時。静かに自分の内側の声に耳を傾けてください。" },
+      reversed: { keyword: "秘密・直感の無視・混乱", meaning: "大切な何かを見落としている可能性があります。感情を抑圧せず、自分の本音と正直に向き合う必要がありそうです。" }
+    },
+    {
+      number: "III", name: "女帝", symbol: "🌸",
+      upright:  { keyword: "豊かさ・創造・愛情", meaning: "豊かさと愛に満たされた時期です。創造的なエネルギーが高まり、物事が実を結びやすい。人間関係においても温かく接することで良縁が育まれます。" },
+      reversed: { keyword: "依存・創造性の停滞・不満", meaning: "依存や執着が成長を妨げているかもしれません。自分自身を大切にし、内側から豊かさを育てることに意識を向けましょう。" }
+    },
+    {
+      number: "IV", name: "皇帝", symbol: "⚡",
+      upright:  { keyword: "権威・安定・リーダーシップ", meaning: "強固な意志と行動力で状況を掌握できます。計画を立て、責任を持って物事を進める時。安定した基盤を築くことで長期的な成功が見えてきます。" },
+      reversed: { keyword: "支配欲・融通のなさ・弱さ", meaning: "頑固になりすぎていないか振り返りましょう。コントロールへの執着が人を遠ざけているかもしれません。柔軟さを持つことが鍵です。" }
+    },
+    {
+      number: "V", name: "法王", symbol: "🕊️",
+      upright:  { keyword: "伝統・教え・信念", meaning: "確かな教えや信念に従うことが道を開きます。メンターや信頼できる人物の助けを借りることも吉。精神的な成長が今の課題です。" },
+      reversed: { keyword: "因習・反抗・束縛", meaning: "古い価値観や他者の期待に縛られていませんか。自分の信念で判断する勇気を持つ時です。型にはまらない発想が突破口になります。" }
+    },
+    {
+      number: "VI", name: "恋人", symbol: "💜",
+      upright:  { keyword: "愛・選択・調和", meaning: "心から大切にできる人や物事との結びつきが深まる時。重要な選択を迫られているなら、頭でなく心で選んでください。誠実な愛が運を開きます。" },
+      reversed: { keyword: "不調和・迷い・誘惑", meaning: "価値観のすれ違いや優柔不断が問題を複雑にしています。本当に望むものを明確にし、誘惑に流されない強さを持ちましょう。" }
+    },
+    {
+      number: "VII", name: "戦車", symbol: "🌠",
+      upright:  { keyword: "勝利・前進・自制心", meaning: "強い意志と行動力で障害を乗り越えられます。迷わず前進してください。勝利は目前です。自分を信じて突き進む姿勢が周囲も動かします。" },
+      reversed: { keyword: "暴走・方向性の迷い・失速", meaning: "エネルギーが空回りしている状態です。力任せに進もうとしていませんか。一度立ち止まり、方向性を見定め直すことが必要です。" }
+    },
+    {
+      number: "VIII", name: "力", symbol: "🦁",
+      upright:  { keyword: "勇気・忍耐・内なる強さ", meaning: "真の強さは優しさと忍耐の中にあります。力で押さえつけるのではなく、穏やかな心で状況をコントロールする時。あなたの中に必要な力はすでにあります。" },
+      reversed: { keyword: "自信喪失・恐れ・弱さ", meaning: "自分への疑念が力を奪っています。失敗を恐れずに、自分の可能性を信じることから始めましょう。小さな一歩が大きな変化を生みます。" }
+    },
+    {
+      number: "IX", name: "隠者", symbol: "🕯️",
+      upright:  { keyword: "内省・孤独・叡智", meaning: "一人の時間を大切にし、内側から答えを探す時です。賑やかな場より静かな場で真実が見えてきます。導きは外ではなく、自分の中にあります。" },
+      reversed: { keyword: "孤立・閉鎖・頑固", meaning: "孤独に閉じこもりすぎていませんか。人との繋がりを断ち切ることで、大切な何かを失っているかもしれません。少し心を開いてみましょう。" }
+    },
+    {
+      number: "X", name: "運命の輪", symbol: "☸️",
+      upright:  { keyword: "変化・運命・好機", meaning: "人生の転換点が訪れています。流れに乗ることで幸運が舞い込む時。変化を恐れず受け入れることで、新しいステージへの扉が開きます。" },
+      reversed: { keyword: "逆境・停滞・悪循環", meaning: "今は試練の時かもしれませんが、それも必然の流れ。抵抗するより受け入れることで、早く状況が好転します。今できることに集中しましょう。" }
+    },
+    {
+      number: "XI", name: "正義", symbol: "⚖️",
+      upright:  { keyword: "公正・真実・バランス", meaning: "誠実で公正な行動が正しい結果をもたらします。今こそ感情より理性で判断する時。真実と向き合う勇気が、長期的な信頼と成功に繋がります。" },
+      reversed: { keyword: "不公平・不誠実・偏り", meaning: "物事を一方的に見ていませんか。偏った判断や自己正当化が問題を招いています。フラットな視点で状況を見直すことが重要です。" }
+    },
+    {
+      number: "XII", name: "吊るされた男", symbol: "🌀",
+      upright:  { keyword: "試練・新視点・受容", meaning: "今は思い通りにならない時期ですが、それは視点を変えるための贈り物。逆境の中に深い学びが隠れています。抵抗せず、流れに身を委ねましょう。" },
+      reversed: { keyword: "犠牲の無駄・停滞・拒否", meaning: "無駄な犠牲を払い続けていないか確認を。解決策は別の場所にあるかもしれません。視点を変えれば、簡単に突破口が見つかることもあります。" }
+    },
+    {
+      number: "XIII", name: "死神", symbol: "🌑",
+      upright:  { keyword: "終わりと始まり・変容・解放", meaning: "古いものが終わり、新しいものが始まる転換期。手放すことへの恐れを超えれば、予想以上の解放感と可能性が待っています。変化を歓迎してください。" },
+      reversed: { keyword: "変化への抵抗・停滞・執着", meaning: "変化を恐れて古い状況にしがみついています。手放すことへの抵抗が成長を妨げています。執着を手放す勇気が新しい扉を開きます。" }
+    },
+    {
+      number: "XIV", name: "節制", symbol: "🌊",
+      upright:  { keyword: "調和・バランス・癒し", meaning: "焦らず丁寧に物事を進める時。極端な行動を避け、穏やかなバランスを保つことで最良の結果が生まれます。今は癒しと調和のエネルギーが味方です。" },
+      reversed: { keyword: "不均衡・行き過ぎ・不調和", meaning: "どこかでバランスが崩れています。食事・睡眠・人間関係など、生活全般を見直してみましょう。過剰なものを減らすことで状況が整います。" }
+    },
+    {
+      number: "XV", name: "悪魔", symbol: "🔗",
+      upright:  { keyword: "束縛・執着・誘惑", meaning: "何かに縛られている感覚はありませんか。欲望や恐れが本来の自分を隠しています。その鎖は自分でつけたもの——外す力も自分の中にあります。" },
+      reversed: { keyword: "解放・気づき・脱却", meaning: "長らくあなたを縛っていたものから解放される予兆です。勇気を持って踏み出せば、驚くほど自由になれます。本当の自分を取り戻す時が来ました。" }
+    },
+    {
+      number: "XVI", name: "塔", symbol: "⚡",
+      upright:  { keyword: "崩壊・突然の変化・覚醒", meaning: "突然の変化や衝撃的な出来事が起きるかもしれません。しかしそれは不要なものを崩し、真実を明らかにするため。嵐の後に清々しい空が広がります。" },
+      reversed: { keyword: "変化の回避・ぎりぎり回避・内的崩壊", meaning: "大きな変化を何とか避けることができそうです。ただし、内側ではすでに何かが揺らいでいます。小さな修正を重ねて、崩壊を未然に防ぎましょう。" }
+    },
+    {
+      number: "XVII", name: "星", symbol: "⭐",
+      upright:  { keyword: "希望・癒し・インスピレーション", meaning: "嵐の後の星明かりのように、希望の光が差し込んでいます。願いが叶う予兆です。自分を信じて、夢に向かって歩み続けましょう。宇宙があなたを応援しています。" },
+      reversed: { keyword: "失望・自己不信・悲観", meaning: "希望を見失いかけていませんか。今は試練でも、光は必ず訪れます。小さな喜びに目を向け、自分への信頼を少しずつ取り戻していきましょう。" }
+    },
+    {
+      number: "XVIII", name: "月", symbol: "🌕",
+      upright:  { keyword: "幻想・不安・潜在意識", meaning: "物事がはっきりしない霧の中にいるようです。直感は鋭いですが、錯覚にも注意。今は重要な決断を急がず、真実が明らかになるのを待ちましょう。" },
+      reversed: { keyword: "混乱の解消・真実の浮上・解放", meaning: "長らく曖昧だったことが明らかになってきます。恐れや不安の霧が晴れ、本当の姿が見えてきます。真実と向き合う準備をしましょう。" }
+    },
+    {
+      number: "XIX", name: "太陽", symbol: "☀️",
+      upright:  { keyword: "成功・喜び・活力", meaning: "最も明るいカードのひとつ。喜びと成功が約束されています。自信を持って行動すれば、物事はうまくいきます。今のあなたの輝きは周囲を照らしています。" },
+      reversed: { keyword: "曇り・過信・喜びの陰り", meaning: "成功は近いですが、過信に注意。些細なことが気になり喜びを感じにくい時かもしれません。完璧を求めすぎず、今この瞬間の幸せに気づきましょう。" }
+    },
+    {
+      number: "XX", name: "審判", symbol: "🔔",
+      upright:  { keyword: "覚醒・再生・使命", meaning: "人生の新たな章への呼びかけです。過去を清算し、本当の使命に気づく時。内なる声に従って行動することで、大きな変革と再生が訪れます。" },
+      reversed: { keyword: "自己批判・過去への囚われ・拒絶", meaning: "過去の失敗や後悔に縛られていませんか。自分を責め続けることをやめ、今この瞬間から新しく始める許可を自分に与えましょう。" }
+    },
+    {
+      number: "XXI", name: "世界", symbol: "🌍",
+      upright:  { keyword: "完成・達成・統合", meaning: "一つのサイクルが完成する素晴らしい時です。努力が実を結び、達成感に満たされます。次の夢へのステップとして、今の成功を十分に味わってください。" },
+      reversed: { keyword: "未完成・停滞・ゴールの遠さ", meaning: "もう少しで完成というところで足踏みしています。完璧主義や先送りが進歩を妨げているかもしれません。まずは今できることを一つ終わらせましょう。" }
+    }
+    // =====================================================
+    // 小アルカナ ワンド（火）14枚
+    // =====================================================
+    ,{
+      number: "ワンドI", name: "ワンドのエース", symbol: "🔥",
+      upright:  { keyword: "新たな情熱・インスピレーション・始動", meaning: "強烈なエネルギーと情熱が降り注いでいます。新しいプロジェクトや挑戦を始める絶好の時。あなたの中の炎を信じて、大胆に踏み出してください。" },
+      reversed: { keyword: "停滞・意欲の低下・方向性の迷い", meaning: "エネルギーはあるのに出口が見つからない状態です。やりたいことを書き出し、一つに絞ることで流れが動き始めます。焦らずじっくり方向性を定めましょう。" }
+    },
+    {
+      number: "ワンドII", name: "ワンドの2", symbol: "🔥",
+      upright:  { keyword: "計画・未来への展望・決断", meaning: "大きな夢を描き、次の一手を計画する時です。遠くを見据えた視野がある今こそ、長期的な目標を設定しましょう。決断を先送りにしないことが鍵です。" },
+      reversed: { keyword: "計画の頓挫・視野の狭さ・不安", meaning: "計画が思うように進まない時期です。今の状況を見直し、柔軟に方向転換する勇気を持ちましょう。小さな一歩の積み重ねが前進につながります。" }
+    },
+    {
+      number: "ワンドIII", name: "ワンドの3", symbol: "🔥",
+      upright:  { keyword: "拡大・前進・成果の確認", meaning: "種まきした努力が実り始めています。視野を広げ、さらなる発展を目指す時。他者との協力や新しい場への進出が吉と出ます。" },
+      reversed: { keyword: "遅延・後退・見通しの甘さ", meaning: "期待していた成果がなかなか出ない時期です。計画の見直しや準備不足の点を補うことで状況が好転します。焦らず着実に進みましょう。" }
+    },
+    {
+      number: "ワンドIV", name: "ワンドの4", symbol: "🔥",
+      upright:  { keyword: "祝福・安定・達成の喜び", meaning: "努力が実を結び、祝福と喜びに満ちた時期です。家族や仲間との絆が深まります。今の安定を大切にしながら、次のステップへの準備を始めましょう。" },
+      reversed: { keyword: "不安定・喜びの欠如・基盤の揺らぎ", meaning: "安心できるはずの場所で何かが上手くいっていない感覚があります。コミュニケーションを丁寧に取り直すことで、関係性が修復されます。" }
+    },
+    {
+      number: "ワンドV", name: "ワンドの5", symbol: "🔥",
+      upright:  { keyword: "競争・摩擦・切磋琢磨", meaning: "周囲との意見の違いや競争が生じる時期です。しかしそれは成長の糧。正面からぶつかることで実力がつき、本当の実力が磨かれます。" },
+      reversed: { keyword: "対立の回避・内なる葛藤・収束", meaning: "争いを避けようとするあまり、本音を隠していませんか。対立を恐れず、建設的な対話を選ぶことで問題が解決に向かいます。" }
+    },
+    {
+      number: "ワンドVI", name: "ワンドの6", symbol: "🔥",
+      upright:  { keyword: "勝利・称賛・自信", meaning: "努力が認められ、周囲から称賛を受ける時期です。自信を持って前に進んでください。今の成功を次のステップへの足がかりにしましょう。" },
+      reversed: { keyword: "自己不信・承認欲求・失敗への恐れ", meaning: "他者の評価が気になりすぎていませんか。成功しても素直に喜べない状態かもしれません。自分自身の基準で進歩を評価することが大切です。" }
+    },
+    {
+      number: "ワンドVII", name: "ワンドの7", symbol: "🔥",
+      upright:  { keyword: "防衛・忍耐・信念を守る", meaning: "周囲からのプレッシャーや挑戦に直面していますが、今こそ信念を曲げない時です。自分の立場を明確にし、粘り強く守り続けることで状況は好転します。" },
+      reversed: { keyword: "諦め・圧倒される感覚・妥協", meaning: "戦い続けることへの疲れを感じているようです。全てを一人で抱えず、助けを求めることも勇気です。優先順位を整理して力を集中させましょう。" }
+    },
+    {
+      number: "ワンドVIII", name: "ワンドの8", symbol: "🔥",
+      upright:  { keyword: "スピード・行動・急展開", meaning: "物事が一気に動き出す予兆です。素早い行動が求められています。チャンスを逃さないよう、今すぐ動き始めてください。流れに乗ることで大きな成果が得られます。" },
+      reversed: { keyword: "遅延・混乱・急ぎすぎ", meaning: "焦りが判断ミスを招いています。物事のスピードが乱れている時です。一度落ち着いて優先順位を整理し、確実に一歩ずつ進みましょう。" }
+    },
+    {
+      number: "ワンドIX", name: "ワンドの9", symbol: "🔥",
+      upright:  { keyword: "粘り強さ・守備・最後の頑張り", meaning: "長い戦いで疲弊していても、もう少しで目標に到達します。諦めずに踏ん張ることが今最も大切です。過去の経験が今のあなたを守る盾になっています。" },
+      reversed: { keyword: "消耗・頑固・被害意識", meaning: "過度な防衛姿勢が物事を複雑にしています。傷ついた経験が壁を作っていませんか。少しだけ心を開くことで、状況が動き始めます。" }
+    },
+    {
+      number: "ワンドX", name: "ワンドの10", symbol: "🔥",
+      upright:  { keyword: "重荷・責任・やり遂げる意志", meaning: "多くの責任を一人で背負っている状態です。それはあなたへの信頼の証。ただし無理は禁物。適切に委任することも賢い選択です。" },
+      reversed: { keyword: "過負荷・手放すべき時・燃え尽き", meaning: "もうこれ以上は抱えられないサインです。何かを手放す決断が必要です。全部完璧にこなすことより、大切なことに集中することを選んでください。" }
+    },
+    {
+      number: "ワンドPg", name: "ワンドのペイジ", symbol: "🔥",
+      upright:  { keyword: "自由な精神・探求・情熱の芽吹き", meaning: "新しいことへの好奇心と熱意が溢れています。まずやってみる精神が今の強み。失敗を恐れず、思い切り探求することで才能が開花します。" },
+      reversed: { keyword: "無計画・落ち着きのなさ・先走り", meaning: "熱意はあっても行動が空回りしています。情熱を持続させるための仕組みを作りましょう。小さな目標を一つずつクリアすることが大切です。" }
+    },
+    {
+      number: "ワンドKn", name: "ワンドのナイト", symbol: "🔥",
+      upright:  { keyword: "行動力・冒険・大胆な推進力", meaning: "圧倒的なエネルギーで目標に向かって突き進む時。大胆に行動することで流れを作り出せます。ただし衝動的にならず、方向性は常に確認しましょう。" },
+      reversed: { keyword: "無謀・衝動的・計画性の欠如", meaning: "行動が先走りすぎて周囲が追いつけない状態です。スピードを少し落とし、周囲の意見に耳を傾けることで大きなミスを避けられます。" }
+    },
+    {
+      number: "ワンドQu", name: "ワンドのクイーン", symbol: "🔥",
+      upright:  { keyword: "自信・情熱・独立心", meaning: "カリスマ性と情熱を兼ね備えた強さがあります。自分の意志を信じて積極的に行動することで、周囲も自然とついてきます。あなたの熱意が周囲を動かします。" },
+      reversed: { keyword: "自己中心・嫉妬・エネルギーの枯渇", meaning: "自信が過剰になり、他者への配慮が欠けているかもしれません。エネルギーを補充する時間を作り、チームとの協調を意識しましょう。" }
+    },
+    {
+      number: "ワンドKg", name: "ワンドのキング", symbol: "🔥",
+      upright:  { keyword: "ビジョン・リーダーシップ・起業家精神", meaning: "大きなビジョンを持ち、人を率いる力があります。今こそリーダーとしての才能を発揮する時。自分の理念を信じ、周囲を鼓舞してください。" },
+      reversed: { keyword: "独裁・傲慢・支配欲", meaning: "リーダーシップが独裁的になっていませんか。力を持つほど謙虚さが必要です。周囲の声を聞く姿勢を取り戻すことで、真の信頼が生まれます。" }
+    },
+    // =====================================================
+    // 小アルカナ カップ（水）14枚
+    // =====================================================
+    {
+      number: "カップI", name: "カップのエース", symbol: "💧",
+      upright:  { keyword: "新たな愛・直感・感情の始まり", meaning: "愛と感情の新しい始まりを告げるカードです。心が開かれ、感受性が高まっています。直感を大切にし、深いつながりを築くチャンスが訪れています。" },
+      reversed: { keyword: "感情の抑圧・空虚感・拒絶", meaning: "感情をうまく表現できずにいる状態です。心のブロックを外すことで、豊かな感情の流れが戻ってきます。自分の気持ちと正直に向き合いましょう。" }
+    },
+    {
+      number: "カップII", name: "カップの2", symbol: "💧",
+      upright:  { keyword: "愛の結合・相互理解・パートナーシップ", meaning: "深い絆と相互の尊重が生まれる時です。恋愛でも仕事でも、対等な関係性が花開きます。今の出会いや縁を大切にしてください。" },
+      reversed: { keyword: "不均衡・すれ違い・関係の緊張", meaning: "関係性のバランスが崩れています。一方的な献身や期待が溝を生んでいるかもしれません。率直な対話でお互いの気持ちを確かめましょう。" }
+    },
+    {
+      number: "カップIII", name: "カップの3", symbol: "💧",
+      upright:  { keyword: "祝福・友情・喜びの共有", meaning: "仲間との絆が深まり、喜びを分かち合える時期です。お祝い事や集まりが吉。人との繋がりがあなたにエネルギーをもたらします。" },
+      reversed: { keyword: "孤立・過剰な享楽・三角関係", meaning: "楽しさの裏に何か不誠実なものが潜んでいませんか。友人関係や恋愛関係の複雑さに注意が必要です。誠実さを大切にしましょう。" }
+    },
+    {
+      number: "カップIV", name: "カップの4", symbol: "💧",
+      upright:  { keyword: "内省・倦怠感・機会の見落とし", meaning: "自分の内側に向きすぎて、目の前のチャンスを見逃しているかもしれません。少し外に目を向けることで、思いがけない贈り物が見えてきます。" },
+      reversed: { keyword: "新たな気づき・チャンスの受け入れ・動き出す", meaning: "内省の時期が終わり、外の世界に目を向ける準備が整っています。新しい提案や縁に積極的に応えることで流れが変わります。" }
+    },
+    {
+      number: "カップV", name: "カップの5", symbol: "💧",
+      upright:  { keyword: "喪失・後悔・悲しみ", meaning: "失ったものへの悲しみや後悔の中にいる時です。しかし、まだ残っているものに目を向けてください。悲しみを通り抜けた先に、新しい希望があります。" },
+      reversed: { keyword: "受容・前進・悲しみからの回復", meaning: "ようやく過去の悲しみを受け入れ、前を向く準備ができています。失ったものより、今あるものに感謝することで心が軽くなります。" }
+    },
+    {
+      number: "カップVI", name: "カップの6", symbol: "💧",
+      upright:  { keyword: "懐かしさ・純粋さ・過去との和解", meaning: "懐かしい思い出や過去の人との再会が心を温める時期です。純粋な気持ちで人と接することが今の幸運の源泉です。" },
+      reversed: { keyword: "過去への執着・現実逃避・成長の停滞", meaning: "過去の良かった時代ばかりを振り返り、今の現実から目をそらしていませんか。過去から学びつつ、今を生きることにエネルギーを向けましょう。" }
+    },
+    {
+      number: "カップVII", name: "カップの7", symbol: "💧",
+      upright:  { keyword: "幻想・選択肢・夢想", meaning: "多くの可能性と誘惑が目の前に広がっています。しかし全てが見た目通りとは限りません。現実と幻想を見極め、本当に望むものを一つ選びましょう。" },
+      reversed: { keyword: "明確さ・幻想からの覚醒・現実直視", meaning: "夢や幻想から覚め、現実と向き合う時が来ました。明確な目標を定め、一点集中で取り組むことで道が開けます。" }
+    },
+    {
+      number: "カップVIII", name: "カップの8", symbol: "💧",
+      upright:  { keyword: "旅立ち・手放す・より深いものを求めて", meaning: "表面的な満足を捨て、魂が求めるものを探す旅に出る時です。今の状況を手放すことは損失ではなく、より大きな充実への第一歩です。" },
+      reversed: { keyword: "引き留め・逃避・決断の先延ばし", meaning: "変化すべきとわかっていながら踏み出せない状態です。恐れではなく、心の声に従って決断することが今最も必要なことです。" }
+    },
+    {
+      number: "カップIX", name: "カップの9", symbol: "💧",
+      upright:  { keyword: "満足・願望成就・幸福感", meaning: "望んでいたことが実現し、深い満足感に包まれる時です。今の幸福を十分に味わってください。感謝の気持ちがさらなる豊かさを引き寄せます。" },
+      reversed: { keyword: "自己満足・欲張り・内的な空虚", meaning: "外見上は満たされているのに、心の深いところで何かが足りない感覚があります。物質的な豊かさより、精神的な充実に目を向けましょう。" }
+    },
+    {
+      number: "カップX", name: "カップの10", symbol: "💧",
+      upright:  { keyword: "完全な幸福・家庭・感情の完成", meaning: "愛と幸福に満ちた理想的な状態が実現します。家族や大切な人との絆が深まり、心から幸せを感じられる時期です。この喜びを周囲とも分かち合いましょう。" },
+      reversed: { keyword: "不和・家庭の問題・理想と現実のギャップ", meaning: "理想の幸福と現実のギャップに苦しんでいます。完璧を求めず、今ある愛や絆に目を向けることで、本当の幸せが見えてきます。" }
+    },
+    {
+      number: "カップPg", name: "カップのペイジ", symbol: "💧",
+      upright:  { keyword: "感受性・創造性・直感のメッセージ", meaning: "豊かな感受性と想像力があなたの強みです。直感から生まれるメッセージを大切にしましょう。アートや感情表現に取り組む時期として最適です。" },
+      reversed: { keyword: "感情の不安定・空想・現実逃避", meaning: "感情に流されすぎて現実が見えにくくなっています。創造的なエネルギーを具体的な形に落とし込む方法を見つけることが大切です。" }
+    },
+    {
+      number: "カップKn", name: "カップのナイト", symbol: "💧",
+      upright:  { keyword: "ロマンス・魅力・感情的な行動", meaning: "ロマンティックなエネルギーが高まっています。感情を行動で示す時。愛する人に気持ちを伝えることが今の流れを作ります。" },
+      reversed: { keyword: "気まぐれ・感情的な操作・現実逃避", meaning: "感情的な気まぐれが周囲を振り回していませんか。行動する前に一度立ち止まり、本当の気持ちを整理することが必要です。" }
+    },
+    {
+      number: "カップQu", name: "カップのクイーン", symbol: "💧",
+      upright:  { keyword: "共感・思いやり・感情的な成熟", meaning: "深い共感力と包容力で周囲を支える存在です。自分の直感を信じながら、感情的に成熟した判断ができます。人の心を癒す力があなたにはあります。" },
+      reversed: { keyword: "依存・感情の不安定・共依存", meaning: "他者の感情に引きずられすぎていませんか。自分自身のケアを優先することで、本来の包容力が戻ってきます。境界線を引くことも愛情です。" }
+    },
+    {
+      number: "カップKg", name: "カップのキング", symbol: "💧",
+      upright:  { keyword: "感情的な知性・寛大さ・バランス", meaning: "感情と理性を巧みにバランスさせる成熟した姿勢があります。周囲の信頼を集め、調和をもたらすリーダーとして輝ける時期です。" },
+      reversed: { keyword: "感情の操作・不誠実・不安定", meaning: "感情が不安定になっているか、感情を使って他者を操ろうとしていませんか。誠実さと内面の安定を取り戻すことが先決です。" }
+    },
+    // =====================================================
+    // 小アルカナ ソード（風）14枚
+    // =====================================================
+    {
+      number: "ソードI", name: "ソードのエース", symbol: "⚔️",
+      upright:  { keyword: "明晰さ・突破・真実の力", meaning: "混乱を切り裂く明晰な知性と真実が訪れます。今こそ決断し、明確な言葉で意思を伝える時。鋭い洞察力が道を開きます。" },
+      reversed: { keyword: "混乱・誤った情報・コミュニケーションの失敗", meaning: "思考が混乱し、正しい判断が難しい状態です。情報を慎重に確認し、発言する前によく考えることが大切です。" }
+    },
+    {
+      number: "ソードII", name: "ソードの2", symbol: "⚔️",
+      upright:  { keyword: "膠着状態・決断の回避・難しい選択", meaning: "どちらを選べばいいか迷い、動けない状態にあります。目を閉じて直感に従うことも一つの答えです。いつかは決断しなければならない時が来ます。" },
+      reversed: { keyword: "情報過多・優柔不断からの脱出・真実の露呈", meaning: "長らく避けていた決断を下す時が来ました。隠れていた情報が明らかになり、判断がしやすくなります。勇気を持って選んでください。" }
+    },
+    {
+      number: "ソードIII", name: "ソードの3", symbol: "⚔️",
+      upright:  { keyword: "悲しみ・傷心・痛みの受容", meaning: "心に痛みを感じている時期です。しかしその痛みは癒しの始まり。悲しみを否定せず、十分に感じることが回復への近道です。時間が解決してくれます。" },
+      reversed: { keyword: "回復・許し・悲しみの手放し", meaning: "心の傷が少しずつ癒え始めています。過去の痛みを手放し、前に進む準備ができてきました。自分への許しが最大の癒しになります。" }
+    },
+    {
+      number: "ソードIV", name: "ソードの4", symbol: "⚔️",
+      upright:  { keyword: "休息・回復・静養", meaning: "今は戦いを止め、しっかりと休む時です。無理に動こうとせず、心身を回復させることが最優先。充分な休息が次の大きな行動の土台になります。" },
+      reversed: { keyword: "動き出す準備・回復後の行動・焦り", meaning: "休息から覚め、再び動き出す準備が整いつつあります。焦らず、体と心の準備が整ったことを確認してから一歩を踏み出しましょう。" }
+    },
+    {
+      number: "ソードV", name: "ソードの5", symbol: "⚔️",
+      upright:  { keyword: "対立・勝者なき争い・敗北感", meaning: "誰も本当には得をしない争いに巻き込まれています。勝つことより、平和的な解決を目指す方が賢明です。意地の張り合いをやめる勇気を持ちましょう。" },
+      reversed: { keyword: "和解・後悔・過去との決別", meaning: "争いや対立から距離を置き、和解の道を探る時です。過去の傷に囚われず、前に進むことを選んでください。" }
+    },
+    {
+      number: "ソードVI", name: "ソードの6", symbol: "⚔️",
+      upright:  { keyword: "移行・回復の旅・変化への適応", meaning: "困難な状況から抜け出し、新しい場所へと移行する時期です。完全に解決していなくても、前に進むことが回復につながります。変化を恐れないでください。" },
+      reversed: { keyword: "足止め・過去への執着・逃避の失敗", meaning: "変化したいのに何かが引き留めています。まだ解決すべき問題が残っているサインかもしれません。向き合うべきことに勇気を持って向き合いましょう。" }
+    },
+    {
+      number: "ソードVII", name: "ソードの7", symbol: "⚔️",
+      upright:  { keyword: "策略・欺き・単独行動", meaning: "誰かが陰で動いているか、あなた自身が正攻法でない手段を取ろうとしているかもしれません。長い目で見ると誠実さが最善の戦略です。" },
+      reversed: { keyword: "真実の発覚・後悔・正直さへの回帰", meaning: "隠されていたことが明らかになります。正直に向き合うことで、失った信頼を取り戻せます。誠実さが唯一の解決策です。" }
+    },
+    {
+      number: "ソードVIII", name: "ソードの8", symbol: "⚔️",
+      upright:  { keyword: "束縛・自己制限・被害者意識", meaning: "状況に縛られているように感じていますが、多くは自分の思い込みかもしれません。縛っているのは外部ではなく内側の恐れです。一歩踏み出す勇気を。" },
+      reversed: { keyword: "解放・自己認識・制限からの脱出", meaning: "長らくあなたを縛っていた思い込みから解放されつつあります。自分の力を取り戻し、新しい選択肢が見えてきます。" }
+    },
+    {
+      number: "ソードIX", name: "ソードの9", symbol: "⚔️",
+      upright:  { keyword: "不安・悪夢・自己批判", meaning: "夜中に目が覚めてしまうような不安や心配が続いています。多くは実際より大きく見えているだけです。信頼できる人に打ち明けることで、気持ちが軽くなります。" },
+      reversed: { keyword: "回復・不安の解消・光の兆し", meaning: "最悪の時期は過ぎようとしています。長かったトンネルの出口が見え始めました。一人で抱え込まず、専門家や友人の助けを借りましょう。" }
+    },
+    {
+      number: "ソードX", name: "ソードの10", symbol: "⚔️",
+      upright:  { keyword: "終焉・裏切り・痛みの極点", meaning: "辛い経験の最底辺にいるかもしれませんが、これ以上悪くなることはありません。終わりは新しい始まりです。夜明けは必ず来ます。" },
+      reversed: { keyword: "回復・再起・底からの這い上がり", meaning: "最悪の局面を乗り越え、再生の時が訪れています。傷は残っていても、前に進む力が戻ってきています。今がまさに立ち上がる時です。" }
+    },
+    {
+      number: "ソードPg", name: "ソードのペイジ", symbol: "⚔️",
+      upright:  { keyword: "好奇心・知への渇望・率直さ", meaning: "鋭い知性と旺盛な好奇心があります。情報を積極的に集め、真実を追い求める時。ただし言葉の鋭さには注意が必要です。" },
+      reversed: { keyword: "ゴシップ・思慮のない発言・散漫", meaning: "知識や情報を誤った形で使っていないか確認を。軽率な発言や噂話が人間関係を傷つけるリスクがあります。言葉は慎重に選びましょう。" }
+    },
+    {
+      number: "ソードKn", name: "ソードのナイト", symbol: "⚔️",
+      upright:  { keyword: "行動力・野心・迅速な決断", meaning: "目標に向かって猪突猛進するエネルギーがあります。素早い決断と行動が今の強みです。ただし周囲への影響を考えながら進みましょう。" },
+      reversed: { keyword: "衝動・無謀・コミュニケーションの問題", meaning: "行動が先走り、後先を考えない判断が問題を招いています。スピードを落とし、周囲の声に耳を傾けることが重要です。" }
+    },
+    {
+      number: "ソードQu", name: "ソードのクイーン", symbol: "⚔️",
+      upright:  { keyword: "独立・公正な判断・明晰な思考", meaning: "感情に流されず、冷静で公正な判断ができます。物事を的確に見極める力が今の強みです。過去の経験が知恵となり、道を照らします。" },
+      reversed: { keyword: "冷酷・批判的すぎ・孤立", meaning: "論理を優先するあまり、冷たく見られているかもしれません。正しさより、相手の気持ちを考えた言い方をすることで関係が改善します。" }
+    },
+    {
+      number: "ソードKg", name: "ソードのキング", symbol: "⚔️",
+      upright:  { keyword: "知的権威・公正・明晰なリーダー", meaning: "論理的な思考と公平な判断力でリーダーシップを発揮できます。言葉に力があり、周囲を正しい方向へ導けます。" },
+      reversed: { keyword: "権威的・冷酷・言葉による支配", meaning: "知性と言葉が武器となり、周囲を傷つけていませんか。力ある言葉には責任が伴います。温かみを持った対話を心がけましょう。" }
+    },
+    // =====================================================
+    // 小アルカナ ペンタクル（地）14枚
+    // =====================================================
+    {
+      number: "ペンタI", name: "ペンタクルのエース", symbol: "🌿",
+      upright:  { keyword: "物質的な新出発・豊かさ・チャンス", meaning: "金運や仕事運が上昇し、新たな豊かさへの扉が開かれています。具体的な計画を立て、着実に行動することで繁栄を手に入れられます。" },
+      reversed: { keyword: "機会の逸失・計画の失敗・物欲", meaning: "目の前のチャンスをうまく活かせていない状態です。今の基盤を見直し、着実な一歩を踏み出すことが大切です。" }
+    },
+    {
+      number: "ペンタII", name: "ペンタクルの2", symbol: "🌿",
+      upright:  { keyword: "バランス・変化への適応・マルチタスク", meaning: "複数のことをうまくやりくりしている時期です。柔軟性を持って変化に対応することで、ピンチをチャンスに変えられます。" },
+      reversed: { keyword: "過負荷・非効率・財政の混乱", meaning: "多くを抱えすぎてバランスが崩れています。優先順位を明確にし、一つずつ丁寧に取り組むことで混乱が整理されます。" }
+    },
+    {
+      number: "ペンタIII", name: "ペンタクルの3", symbol: "🌿",
+      upright:  { keyword: "協力・技術・着実な成長", meaning: "チームワークと専門技術が実を結ぶ時期です。周囲との協力関係を大切にしながら、スキルを磨き続けることで確実な成果が生まれます。" },
+      reversed: { keyword: "不和・非協力・質の低下", meaning: "チーム内の連携が上手くいっていません。コミュニケーション不足や役割の不明確さが原因かもしれません。率直な対話で状況を改善しましょう。" }
+    },
+    {
+      number: "ペンタIV", name: "ペンタクルの4", symbol: "🌿",
+      upright:  { keyword: "安定・節約・所有への執着", meaning: "今持っているものを守ることに集中している時期です。安全志向は大切ですが、過度な執着は成長を妨げます。適度な冒険も忘れずに。" },
+      reversed: { keyword: "浪費・手放す・コントロールの喪失", meaning: "財産や資源の管理が乱れていませんか。反対に、執着を手放し余裕を生み出すことで新しい豊かさが流れ込んでくることもあります。" }
+    },
+    {
+      number: "ペンタV", name: "ペンタクルの5", symbol: "🌿",
+      upright:  { keyword: "困窮・孤立・経済的な苦しみ", meaning: "経済的または精神的に苦しい時期かもしれません。しかし助けを求めることをためらわないでください。手を差し伸べてくれる人が必ずいます。" },
+      reversed: { keyword: "回復・困難からの脱出・援助の受け入れ", meaning: "困難な状況が少しずつ好転し始めています。プライドを手放し、受け取る姿勢を持つことで状況が改善されます。" }
+    },
+    {
+      number: "ペンタVI", name: "ペンタクルの6", symbol: "🌿",
+      upright:  { keyword: "寛大さ・与える・受け取る", meaning: "与えることと受け取ることのバランスが整っています。惜しみなく与える姿勢が、やがて自分への豊かさとなって戻ってきます。" },
+      reversed: { keyword: "不公平・一方的な施し・依存", meaning: "与えすぎているか、受け取るだけになっていませんか。対等な関係性を意識することが、本当の豊かさへの道です。" }
+    },
+    {
+      number: "ペンタVII", name: "ペンタクルの7", symbol: "🌿",
+      upright:  { keyword: "忍耐・成果の評価・長期的視点", meaning: "じっくりと育ててきたものが実り始める時期です。焦らず待つことも戦略のひとつ。今の取り組みが将来の豊かさへと繋がっています。" },
+      reversed: { keyword: "短絡的・努力の無駄・焦り", meaning: "すぐに結果が出ないことへの焦りが判断を狂わせています。長期的な視点を持ち、継続することの価値を信じましょう。" }
+    },
+    {
+      number: "ペンタVIII", name: "ペンタクルの8", symbol: "🌿",
+      upright:  { keyword: "職人技・研鑽・努力の積み重ね", meaning: "一つのことに集中して技術を磨く時期です。地道な努力が確実な成果につながります。完成度を高めるプロセスそのものを楽しみましょう。" },
+      reversed: { keyword: "怠慢・完璧主義・スキルの無駄", meaning: "努力が正しい方向に向かっていないかもしれません。または完璧を求めすぎて前に進めない状態です。まず完成させることを優先しましょう。" }
+    },
+    {
+      number: "ペンタIX", name: "ペンタクルの9", symbol: "🌿",
+      upright:  { keyword: "豊かさ・自立・成功の享受", meaning: "努力が実を結び、経済的・精神的な豊かさを享受できる時期です。自分の力で築いた成功を誇りに思いながら、ゆったりと喜びを味わいましょう。" },
+      reversed: { keyword: "見せかけの豊かさ・依存・過剰消費", meaning: "表面的な豊かさの裏に不安が潜んでいませんか。本当の自立とは何かを見直す時期です。物質より内的な充実を優先しましょう。" }
+    },
+    {
+      number: "ペンタX", name: "ペンタクルの10", symbol: "🌿",
+      upright:  { keyword: "財の安定・家族・長期的な繁栄", meaning: "家族や長い絆で結ばれた人々との間に豊かさが満ちています。今の繁栄は過去の努力の積み重ね。この豊かさを次の世代にも繋いでいきましょう。" },
+      reversed: { keyword: "家庭の問題・財の損失・価値観の相違", meaning: "家族や長年の関係者との間でトラブルが生じています。財産や価値観に関する話し合いを丁寧に行うことが大切です。" }
+    },
+    {
+      number: "ペンタPg", name: "ペンタクルのペイジ", symbol: "🌿",
+      upright:  { keyword: "学びへの意欲・新たなスキル・可能性", meaning: "実用的なスキルや知識を習得する絶好の時期です。勉強や資格取得が吉。地道な努力が将来の豊かさの種になります。" },
+      reversed: { keyword: "怠慢・集中力の欠如・学びの停滞", meaning: "学ぶ意欲が落ちていたり、せっかくの機会を活かせていません。小さな目標から始めて、学ぶ楽しさを取り戻しましょう。" }
+    },
+    {
+      number: "ペンタKn", name: "ペンタクルのナイト", symbol: "🌿",
+      upright:  { keyword: "勤勉・着実な前進・信頼性", meaning: "真面目で着実な努力が周囲の信頼を集めています。スピードより確実さを重視する姿勢が今の強みです。コツコツ積み上げることで大きな成果が生まれます。" },
+      reversed: { keyword: "停滞・融通のなさ・完璧主義", meaning: "慎重すぎて動けない状態になっていませんか。リスクを恐れるあまり、チャンスを逃しているかもしれません。適度な柔軟性を持ちましょう。" }
+    },
+    {
+      number: "ペンタQu", name: "ペンタクルのクイーン", symbol: "🌿",
+      upright:  { keyword: "実用性・豊かさ・大地のような包容力", meaning: "現実的な判断力と温かい包容力で周囲を支えています。家庭と仕事を両立させる力があり、身の回りに豊かさが満ちています。" },
+      reversed: { keyword: "物質主義・仕事優先・自己ケアの欠如", meaning: "外の世界に気を取られ、自分自身を後回しにしていませんか。自己ケアと休息を取り入れることで、本来の力が戻ってきます。" }
+    },
+    {
+      number: "ペンタKg", name: "ペンタクルのキング", symbol: "🌿",
+      upright:  { keyword: "豊かさ・安定・ビジネスの成功", meaning: "堅実な判断と努力の積み重ねで、物質的な豊かさと安定を手に入れています。財務的な責任を持ちながら、周囲にも惜しみなく与えられる存在です。" },
+      reversed: { keyword: "強欲・物質主義・財の乱用", meaning: "豊かさに執着しすぎていませんか。お金や地位を手にするほど、その本当の使い方が問われます。何のための豊かさかを見つめ直しましょう。" }
+    }
+  ];
+
+  // =====================================================
+  // スプレッド定義（追加・拡張可能）
+  // =====================================================
+  const spreads = {
+    3: {
+      label: "3枚引き｜過去・現在・未来",
+      positions: ["過去", "現在", "未来"]
+    },
+    1: {
+      label: "1枚引き｜今日のカード",
+      positions: ["あなたへのメッセージ"]
+    }
+  };
+
+  // =====================================================
+  // 総合メッセージ生成
+  // =====================================================
+  function buildOverallMessage(drawnCards, spreadType) {
+    const names = drawnCards.map(c => c.card.name + (c.reversed ? "（逆）" : ""));
+    const keywords = drawnCards.map(c => c.reversed ? c.card.reversed.keyword : c.card.upright.keyword);
+
+    if (spreadType === 1) {
+      return `今日のカードは「${names[0]}」。${keywords[0]}のエネルギーがあなたを包んでいます。このカードのメッセージを胸に、今日一日を過ごしてみてください。`;
+    }
+
+    const hasPositive = drawnCards.filter(c => !c.reversed).length;
+    const tone = hasPositive >= 2
+      ? "全体的にポジティブなエネルギーが流れています。"
+      : "今は内省と立て直しのタイミングです。";
+
+    return `${tone}過去に「${names[0]}」、現在に「${names[1]}」、未来に「${names[2]}」が示されました。${keywords[1]}という現在の状況を踏まえ、${keywords[2]}の方向へと歩みを進めることで、状況はより良い方向へと向かっていくでしょう。`;
+  }
+
+  // =====================================================
+  // UI ロジック
+  // =====================================================
+  let currentSpread = 3;
+
+  document.querySelectorAll('.spread-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.spread-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSpread = parseInt(btn.dataset.spread);
+    });
+  });
+
+  document.getElementById('divine-btn').addEventListener('click', () => {
+    document.getElementById('form-section').style.display = 'none';
+    showDeck();
+  });
+
+  function showDeck() {
+    const area = document.getElementById('deck-area');
+    const deckCards = document.getElementById('deck-cards');
+    area.classList.add('show');
+    deckCards.innerHTML = '';
+
+    const count = currentSpread;
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      el.className = 'deck-card';
+      el.style.setProperty('--delay', `${i * 0.15}s`);
+      el.dataset.index = i;
+      el.addEventListener('click', onCardClick);
+      deckCards.appendChild(el);
+    }
+  }
+
+  let flipped = 0;
+  let drawnCards = [];
+
+  function onCardClick(e) {
+    const el = e.currentTarget;
+    if (el.dataset.flipped) return;
+    el.dataset.flipped = '1';
+    el.removeEventListener('click', onCardClick);
+
+    // カードを決定
+    const remaining = tarotCards.filter(c => !drawnCards.find(d => d.card.name === c.name));
+    const card = remaining[Math.floor(Math.random() * remaining.length)];
+    const reversed = Math.random() < 0.35;
+    drawnCards.push({ card, reversed });
+
+    el.style.background = 'linear-gradient(135deg, rgba(109,40,217,0.5), rgba(45,27,105,0.7))';
+    el.style.transform = 'translateY(-8px) scale(1.05)';
+    el.style.borderColor = 'rgba(192,132,252,0.7)';
+
+    flipped++;
+    if (flipped === currentSpread) {
+      setTimeout(showResult, 600);
+    }
+  }
+
+  function showResult() {
+    document.getElementById('deck-area').classList.remove('show');
+    document.getElementById('result').classList.add('show');
+
+    const question = document.getElementById('question').value.trim();
+    const spread = spreads[currentSpread];
+
+    document.getElementById('result-question').innerHTML = question
+      ? `「<span>${question}</span>」についての答え`
+      : '今のあなたへのメッセージ';
+    document.getElementById('spread-label').textContent = `✦ ${spread.label} ✦`;
+
+    const row = document.getElementById('cards-row');
+    row.innerHTML = '';
+    drawnCards.forEach((item, i) => {
+      const { card, reversed } = item;
+      const data = reversed ? card.reversed : card.upright;
+      const posLabel = spread.positions[i];
+
+      const el = document.createElement('div');
+      el.className = 'card-result';
+      el.style.animationDelay = `${i * 0.2 + 0.1}s`;
+      el.innerHTML = `
+        <div class="card-position">${posLabel}</div>
+        <div class="card-face">
+          <span class="card-symbol" style="${reversed ? 'transform:rotate(180deg);display:inline-block;' : ''}">${card.symbol}</span>
+          <p class="card-number">${card.number}</p>
+          <p class="card-name">${card.name}</p>
+          <span class="card-orientation ${reversed ? 'reversed' : 'upright'}">${reversed ? '逆位置' : '正位置'}</span>
+          <p class="card-meaning"><strong style="color:#c084fc;font-size:0.78rem;">${data.keyword}</strong><br><br>${data.meaning}</p>
+        </div>
+      `;
+      row.appendChild(el);
+    });
+
+    document.getElementById('overall-text').textContent = buildOverallMessage(drawnCards, currentSpread);
+
+    // シェアボタン
+    document.getElementById('share-btn').onclick = () => {
+      const names = drawnCards.map(c => c.card.name + (c.reversed ? '(逆)' : '')).join(' / ');
+      const text = `🃏タロット占いの結果\n引いたカード: ${names}\n\n#タロット占い #占いの館`;
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`);
+    };
+  }
+
+  document.getElementById('retry-btn').addEventListener('click', () => {
+    flipped = 0;
+    drawnCards = [];
+    document.getElementById('result').classList.remove('show');
+    document.getElementById('form-section').style.display = 'block';
+    document.getElementById('question').value = '';
+  });
+
+  // 星生成
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2 + 0.5;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      top:${Math.random()*100}%; left:${Math.random()*100}%;
+      --dur:${2+Math.random()*4}s;
+      --min:${0.1+Math.random()*0.3};
+      --max:${0.5+Math.random()*0.5};
+      animation-delay:${Math.random()*4}s;
+    `;
+    starsEl.appendChild(s);
+  }
+  </script>
+</body>
+</html>
