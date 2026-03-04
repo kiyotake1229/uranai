@@ -178,8 +178,7 @@
     @keyframes dealIn {
       to { opacity: 1; transform: translateY(0); }
     }
-    .deck-card::after {
-      content: '🔮';
+    .deck-card-icon {
       position: absolute;
       inset: 0;
       display: flex;
@@ -936,6 +935,7 @@
       el.className = 'deck-card';
       el.style.setProperty('--delay', `${i * 0.15}s`);
       el.dataset.index = i;
+      el.innerHTML = '<span class="deck-card-icon">🔮</span>';
       el.addEventListener('click', onCardClick);
       deckCards.appendChild(el);
     }
