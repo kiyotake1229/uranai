@@ -190,9 +190,54 @@
       background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(109, 40, 217, 0.4));
     }
 
+    /* LINE バナー */
+    .line-banner {
+      margin-top: 56px;
+      background: linear-gradient(135deg, rgba(0,185,0,0.1), rgba(0,150,0,0.05));
+      border: 1px solid rgba(0,185,0,0.25);
+      border-radius: 20px;
+      padding: 28px 24px;
+      text-align: center;
+    }
+    .line-banner-title {
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      color: #86efac;
+      margin-bottom: 8px;
+    }
+    .line-banner-desc {
+      font-size: 0.88rem;
+      color: #c4b5fd;
+      opacity: 0.85;
+      margin-bottom: 20px;
+      line-height: 1.7;
+    }
+    .btn-line {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #06C755;
+      color: #fff;
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      padding: 13px 32px;
+      border-radius: 50px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(6,199,85,0.3);
+    }
+    .btn-line:hover {
+      background: #05a847;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6,199,85,0.4);
+    }
+    .btn-line svg { width: 22px; height: 22px; fill: #fff; }
+
     footer {
       text-align: center;
-      margin-top: 72px;
+      margin-top: 40px;
       color: #6d28d9;
       font-size: 0.8rem;
       letter-spacing: 0.08em;
@@ -254,6 +299,16 @@
         <div class="card-arrow">→</div>
       </a>
 
+    </div>
+
+    <!-- LINE バナー -->
+    <div class="line-banner">
+      <p class="line-banner-title">✦ 毎週の運勢を受け取る ✦</p>
+      <p class="line-banner-desc">LINE公式アカウントを友だち追加すると<br>毎週の星座ランキングや運勢を無料でお届けします</p>
+      <a class="btn-line" href="https://lin.ee/XXXXXXXX" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.02 2 11c0 3.19 1.74 6.01 4.41 7.76L6 22l3.47-1.8C10.26 20.38 11.12 20.5 12 20.5c5.52 0 10-4.02 10-9S17.52 2 12 2z"/></svg>
+        LINE で友だち追加
+      </a>
     </div>
 
     <footer>© 占いの館 | 娯楽目的のコンテンツです</footer>

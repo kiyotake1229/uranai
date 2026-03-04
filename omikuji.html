@@ -245,6 +245,14 @@
     }
     .btn-retry:hover { opacity: 0.85; transform: translateY(-1px); }
 
+    .btn-line-small { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 320px; margin: 0 auto 14px; padding: 14px; background: #06C755; border-radius: 50px; color: #fff; text-decoration: none; font-family: inherit; font-size: 0.92rem; font-weight: bold; letter-spacing: 0.06em; transition: all 0.2s; box-shadow: 0 4px 16px rgba(6,199,85,0.3); }
+    .btn-line-small:hover { background: #05a847; transform: translateY(-1px); }
+    .other-uranai { margin: 28px 0 8px; text-align: center; }
+    .other-uranai-title { font-size: 0.78rem; letter-spacing: 0.15em; color: #7c3aed; margin-bottom: 14px; }
+    .other-uranai-links { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .other-uranai-links a { text-decoration: none; color: #c4b5fd; font-size: 0.85rem; letter-spacing: 0.06em; padding: 8px 18px; border: 1px solid rgba(139,92,246,0.3); border-radius: 24px; background: rgba(45,27,105,0.3); transition: all 0.2s; }
+    .other-uranai-links a:hover { background: rgba(109,40,217,0.4); border-color: rgba(192,132,252,0.5); color: #f0abfc; }
+
     .btn-share {
       display: block;
       width: 100%;
@@ -341,6 +349,18 @@
 
       <button class="btn-retry" id="retry-btn">🎋 もう一度引く</button>
       <button class="btn-share" id="share-btn">𝕏 結果をシェアする</button>
+      <div class="other-uranai">
+        <p class="other-uranai-title">✦ 他の占いも試してみる ✦</p>
+        <div class="other-uranai-links">
+          <a href="seiza.html">🌙 星座×血液型</a>
+          <a href="aishō.html">💕 相性占い</a>
+          <a href="tarot.html">🃏 タロット</a>
+          <a href="numerology.html">✨ 数秘術</a>
+        </div>
+      </div>
+      <a class="btn-line-small" href="https://lin.ee/XXXXXXXX" target="_blank" rel="noopener">
+        <span style="font-size:1.1rem;">💬</span> LINEで毎週の運勢を受け取る
+      </a>
       <a class="back-link" href="index.html">🔮 占いTOPへ戻る</a>
     </div>
 
