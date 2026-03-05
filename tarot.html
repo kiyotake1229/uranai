@@ -892,10 +892,14 @@
   // =====================================================
   function buildOverallMessage(drawnCards, spreadType) {
     const names = drawnCards.map(c => c.card.name + (c.reversed ? "（逆）" : ""));
-    const keywords = drawnCards.map(c => c.reversed ? c.card.reversed.keyword : c.card.upright.keyword);
+    // キーワードの最初の単語だけ取り出して文中に自然に使う
+    const firstKeyword = drawnCards.map(c => {
+      const kw = c.reversed ? c.card.reversed.keyword : c.card.upright.keyword;
+      return kw.split("・")[0];
+    });
 
     if (spreadType === 1) {
-      return `今日のカードは「${names[0]}」。${keywords[0]}のエネルギーがあなたを包んでいます。このカードのメッセージを胸に、今日一日を過ごしてみてください。`;
+      return `今日のカードは「${names[0]}」。${firstKeyword[0]}のエネルギーがあなたを包んでいます。このカードのメッセージを胸に、今日一日を過ごしてみてください。`;
     }
 
     const hasPositive = drawnCards.filter(c => !c.reversed).length;
@@ -903,7 +907,7 @@
       ? "全体的にポジティブなエネルギーが流れています。"
       : "今は内省と立て直しのタイミングです。";
 
-    return `${tone}過去に「${names[0]}」、現在に「${names[1]}」、未来に「${names[2]}」が示されました。${keywords[1]}という現在の状況を踏まえ、${keywords[2]}の方向へと歩みを進めることで、状況はより良い方向へと向かっていくでしょう。`;
+    return `${tone}過去に「${names[0]}」、現在に「${names[1]}」、未来に「${names[2]}」が示されました。現在は${firstKeyword[1]}のエネルギーの中にあり、${firstKeyword[2]}へと向かう流れが生まれています。カードのメッセージを受け取り、一歩ずつ前に進んでいきましょう。`;
   }
 
   // =====================================================
